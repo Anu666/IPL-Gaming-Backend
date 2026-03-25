@@ -1,4 +1,5 @@
 ﻿using IPL.Gaming.Attributes;
+using IPL.Gaming.Common.Enums;
 using IPL.Gaming.Common.Models.CosmosDB;
 using IPL.Gaming.Services;
 using IPL.Gaming.Services.Interfaces;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace IPL.Gaming.Controllers
 {
     [ApiKey]
+    [RequireRole(UserRole.Admin)]
     [Route("api/users")]
     [ApiController]
     public class UsersController : BaseController
@@ -132,7 +134,6 @@ namespace IPL.Gaming.Controllers
         /// Manually refresh the user API key cache
         /// </summary>
         [HttpPost("RefreshCache")]
-        [ApiKey]
         public async Task<IActionResult> RefreshCache()
         {
             try
@@ -151,7 +152,6 @@ namespace IPL.Gaming.Controllers
         /// Get cache statistics
         /// </summary>
         [HttpGet("CacheStats")]
-        [ApiKey]
         public IActionResult GetCacheStats()
         {
             try
