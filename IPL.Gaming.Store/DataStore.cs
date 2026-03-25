@@ -13,6 +13,7 @@ namespace IPL.Gaming.Store
         public const string Match = "match";
         public const string MasterData = "masterdata";
         public const string Question = "question";
+        public const string UserAnswer = "useranswer";
 
         public DataStore()
         {

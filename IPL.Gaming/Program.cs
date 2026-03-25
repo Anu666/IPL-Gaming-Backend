@@ -21,11 +21,13 @@ builder.Services.AddScoped<ICosmosService, CosmosService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IMatchRepository, MatchRepository>();
 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
+builder.Services.AddScoped<IUserAnswerRepository, UserAnswerRepository>();
 
 // Register Services
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IMatchService, MatchService>();
 builder.Services.AddScoped<IQuestionService, QuestionService>();
+builder.Services.AddScoped<IUserAnswerService, UserAnswerService>();
 
 // Register User Cache Service (Singleton for caching, Hosted Service for startup loading)
 builder.Services.AddSingleton<UserCacheService>();
