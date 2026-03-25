@@ -19,9 +19,15 @@ builder.Services.AddScoped<ICosmosService, CosmosService>();
 
 // Register Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IMatchRepository, MatchRepository>();
 
 // Register Services
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IMatchService, MatchService>();
+
+// Register User Cache Service (Singleton for caching, Hosted Service for startup loading)
+builder.Services.AddSingleton<UserCacheService>();
+builder.Services.AddHostedService(provider => provider.GetRequiredService<UserCacheService>());
 
 var app = builder.Build();
 

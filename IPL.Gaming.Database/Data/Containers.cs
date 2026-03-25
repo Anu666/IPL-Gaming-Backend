@@ -14,7 +14,7 @@ namespace IPL.Gaming.Database.Data
 
         private static void PopulateContainerDetailsData()
         {
-            var strategy = new ContainerDetail()
+            var user = new ContainerDetail()
             {
                 Name = DataStore.User,
                 PartitionKey = "id",
@@ -24,12 +24,18 @@ namespace IPL.Gaming.Database.Data
                 Name = DataStore.MasterData,
                 PartitionKey = "type",
             };
+            var match = new ContainerDetail()
+            {
+                Name = DataStore.Match,
+                PartitionKey = "type",
+            };
 
             Containers.ContainerList.AddRange(
                 new List<ContainerDetail>()
                 {
-                    strategy,
+                    user,
                     masterdata,
+                    match,
                 }
             );
         }

@@ -10,6 +10,7 @@ namespace IPL.Gaming.Store
     public partial class DataStore
     {
         public const string User = "user";
+        public const string Match = "match";
         public const string MasterData = "masterdata";
 
         public DataStore()

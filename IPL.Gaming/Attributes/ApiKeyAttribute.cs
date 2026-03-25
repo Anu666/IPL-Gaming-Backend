@@ -1,35 +1,75 @@
-using IPL.Gaming.Common.Exceptions;
+using IPL.Gaming.Common.Models.CosmosDB;
+using IPL.Gaming.Services;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Threading.Tasks;
 
 namespace IPL.Gaming.Attributes
 {
-    // https://www.codeproject.com/Articles/5287482/Secure-ASP-NET-Core-Web-API-using-API-Key-Authenti
-    [AttributeUsage(validOn: AttributeTargets.Class | AttributeTargets.Method)]
-    public class ApiKeyAttribute : Attribute, IAsyncActionFilter
+    /// <summary>
+    /// Attribute to validate API key in request headers
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
+    public class ApiKeyAttribute : Attribute, IAuthorizationFilter
     {
-        private const string APIKEYNAME = "ApiKey";
+        private const string API_KEY_HEADER_NAME = "X-Api-Key";
 
-        public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+        public void OnAuthorization(AuthorizationFilterContext context)
         {
-            if (!context.HttpContext.Request.Headers.TryGetValue(APIKEYNAME, out var extractedApiKey))
+            // Check if API key is present in headers
+            if (!context.HttpContext.Request.Headers.TryGetValue(API_KEY_HEADER_NAME, out var apiKeyHeaderValue))
             {
-                throw new ApiKeyException("Api Key was not provided.");
+                context.Result = new UnauthorizedObjectResult(new 
+                { 
+                    message = "API Key is missing. Please provide a valid API key in the X-Api-Key header." 
+                });
+                return;
             }
 
-            var appSettings = context.HttpContext.RequestServices.GetRequiredService<IConfiguration>();
+            var apiKey = apiKeyHeaderValue.ToString();
 
-            var apiKey = appSettings.GetValue<string>(APIKEYNAME);
-
-            if (!apiKey.Equals(extractedApiKey))
+            if (string.IsNullOrWhiteSpace(apiKey))
             {
-                throw new ApiKeyException("Invalid Api Key.");
+                context.Result = new UnauthorizedObjectResult(new 
+                { 
+                    message = "API Key is invalid." 
+                });
+                return;
             }
 
-            await next();
+            // Get the user cache service
+            var userCacheService = context.HttpContext.RequestServices.GetService<UserCacheService>();
+            
+            if (userCacheService == null)
+            {
+                context.Result = new StatusCodeResult(500);
+                return;
+            }
+
+            // Validate API key and get user
+            var user = userCacheService.GetUserByApiKey(apiKey);
+
+            if (user == null)
+            {
+                context.Result = new UnauthorizedObjectResult(new 
+                { 
+                    message = "Invalid API Key. Please provide a valid API key." 
+                });
+                return;
+            }
+
+            if (!user.IsActive)
+            {
+                context.Result = new UnauthorizedObjectResult(new 
+                { 
+                    message = "User account is inactive." 
+                });
+                return;
+            }
+
+            // Store user in HttpContext for later use in controllers
+            context.HttpContext.Items["User"] = user;
+            context.HttpContext.Items["UserId"] = user.Id;
+            context.HttpContext.Items["UserRole"] = user.Role;
         }
     }
 }

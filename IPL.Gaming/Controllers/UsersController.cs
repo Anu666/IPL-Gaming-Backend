@@ -1,21 +1,24 @@
 ﻿using IPL.Gaming.Attributes;
 using IPL.Gaming.Common.Models.CosmosDB;
+using IPL.Gaming.Services;
 using IPL.Gaming.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace IPL.Gaming.Controllers
 {
-    //[ApiKey]
+    [ApiKey]
     [Route("api/users")]
     [ApiController]
-    public class UsersController : ControllerBase
+    public class UsersController : BaseController
     {
         private readonly IUserService _userService;
+        private readonly UserCacheService _userCacheService;
 
-        public UsersController(IUserService userService)
+        public UsersController(IUserService userService, UserCacheService userCacheService)
         {
             _userService = userService;
+            _userCacheService = userCacheService;
         }
 
         [HttpGet]
@@ -122,6 +125,43 @@ namespace IPL.Gaming.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Manually refresh the user API key cache
+        /// </summary>
+        [HttpPost("RefreshCache")]
+        [ApiKey]
+        public async Task<IActionResult> RefreshCache()
+        {
+            try
+            {
+                await _userCacheService.RefreshCache();
+                var count = _userCacheService.GetCachedUserCount();
+                return Ok(new { message = $"Cache refreshed successfully. {count} users cached." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error refreshing cache", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Get cache statistics
+        /// </summary>
+        [HttpGet("CacheStats")]
+        [ApiKey]
+        public IActionResult GetCacheStats()
+        {
+            try
+            {
+                var count = _userCacheService.GetCachedUserCount();
+                return Ok(new { cachedUsers = count });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error getting cache stats", error = ex.Message });
             }
         }
     }
