@@ -1,0 +1,31 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace IPL.Gaming.Store
+{
+    public partial class DataStore
+    {
+        public const string User = "user";
+        public const string MasterData = "masterdata";
+
+        public DataStore()
+        {
+
+        }
+
+        public static List<object> GetRecords(string containerName)
+        {
+            switch (containerName)
+            {
+                case MasterData:
+                    return MasterDataRecords;
+                default:
+                    return new List<object>();
+            }
+        }
+    }
+}

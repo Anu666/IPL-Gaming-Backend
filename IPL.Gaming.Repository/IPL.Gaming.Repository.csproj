@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\IPL.Gaming.Common\IPL.Gaming.Common.csproj" />
+    <ProjectReference Include="..\IPL.Gaming.Database\IPL.Gaming.Database.csproj" />
+    <ProjectReference Include="..\IPL.Gaming.Store\IPL.Gaming.Store.csproj" />
+  </ItemGroup>
+
+</Project>

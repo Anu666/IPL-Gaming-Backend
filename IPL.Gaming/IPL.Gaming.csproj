@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\IPL.Gaming.Common\IPL.Gaming.Common.csproj" />
+    <ProjectReference Include="..\IPL.Gaming.Database\IPL.Gaming.Database.csproj" />
+    <ProjectReference Include="..\IPL.Gaming.Repository\IPL.Gaming.Repository.csproj" />
+    <ProjectReference Include="..\IPL.Gaming.Services\IPL.Gaming.Services.csproj" />
+  </ItemGroup>
+
+</Project>
