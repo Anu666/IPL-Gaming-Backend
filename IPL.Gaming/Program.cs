@@ -20,10 +20,12 @@ builder.Services.AddScoped<ICosmosService, CosmosService>();
 // Register Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IMatchRepository, MatchRepository>();
+builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 
 // Register Services
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IMatchService, MatchService>();
+builder.Services.AddScoped<IQuestionService, QuestionService>();
 
 // Register User Cache Service (Singleton for caching, Hosted Service for startup loading)
 builder.Services.AddSingleton<UserCacheService>();
