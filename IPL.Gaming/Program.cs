@@ -22,12 +22,14 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IMatchRepository, MatchRepository>();
 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 builder.Services.AddScoped<IUserAnswerRepository, UserAnswerRepository>();
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 
 // Register Services
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IMatchService, MatchService>();
 builder.Services.AddScoped<IQuestionService, QuestionService>();
 builder.Services.AddScoped<IUserAnswerService, UserAnswerService>();
+builder.Services.AddScoped<ITransactionService, TransactionService>();
 
 // Register User Cache Service (Singleton for caching, Hosted Service for startup loading)
 builder.Services.AddSingleton<UserCacheService>();

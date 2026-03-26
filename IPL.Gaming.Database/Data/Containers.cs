@@ -39,6 +39,11 @@ namespace IPL.Gaming.Database.Data
                 Name = DataStore.UserAnswer,
                 PartitionKey = "matchId",
             };
+            var transaction = new ContainerDetail()
+            {
+                Name = DataStore.Transaction,
+                PartitionKey = "userId",
+            };
 
             Containers.ContainerList.AddRange(
                 new List<ContainerDetail>()
@@ -48,6 +53,7 @@ namespace IPL.Gaming.Database.Data
                     match,
                     question,
                     userAnswer,
+                    transaction,
                 }
             );
         }
