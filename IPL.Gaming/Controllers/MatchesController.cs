@@ -1,4 +1,5 @@
 using IPL.Gaming.Attributes;
+using IPL.Gaming.Common.Enums;
 using IPL.Gaming.Common.Models.CosmosDB;
 using IPL.Gaming.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -72,6 +73,7 @@ namespace IPL.Gaming.Controllers
         }
         [HttpPost]
         [Route("CreateMatch")]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
         public async Task<IActionResult> CreateMatch([FromBody] Match match)
         {
             try
@@ -97,6 +99,7 @@ namespace IPL.Gaming.Controllers
 
         [HttpPut]
         [Route("UpdateMatch")]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
         public async Task<IActionResult> UpdateMatch([FromBody] Match match)
         {
             try
@@ -117,6 +120,7 @@ namespace IPL.Gaming.Controllers
 
         [HttpDelete]
         [Route("DeleteMatch/{matchId}")]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
         public async Task<IActionResult> DeleteMatch(Guid matchId)
         {
             try

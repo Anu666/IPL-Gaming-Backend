@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Mvc;
 namespace IPL.Gaming.Controllers
 {
     [ApiKey]
-    [RequireRole(UserRole.Admin)]
     [Route("api/users")]
     [ApiController]
     public class UsersController : BaseController
@@ -24,6 +23,7 @@ namespace IPL.Gaming.Controllers
         }
 
         [HttpGet]
+        [RequireRole(UserRole.SuperAdmin)]
         public async Task<IActionResult> GetAllUsers()
         {
             var users = await _userService.GetAllUsers();
@@ -32,6 +32,7 @@ namespace IPL.Gaming.Controllers
 
         [HttpGet]
         [Route("{userId}")]
+        [RequireRole(UserRole.SuperAdmin)]
         public async Task<IActionResult> GetUserById(Guid userId)
         {
             try
@@ -51,6 +52,7 @@ namespace IPL.Gaming.Controllers
 
         [HttpGet]
         [Route("GetUserByApiKey/{apiKey}")]
+        [RequireRole(UserRole.SuperAdmin)]
         public async Task<IActionResult> GetUserByApiKey(string apiKey)
         {
             try
@@ -69,6 +71,7 @@ namespace IPL.Gaming.Controllers
         }
 
         [HttpPost]
+        [RequireRole(UserRole.SuperAdmin)]
         public async Task<IActionResult> CreateUser([FromBody] User user)
         {
             try
@@ -93,6 +96,7 @@ namespace IPL.Gaming.Controllers
         }
 
         [HttpPut]
+        [RequireRole(UserRole.SuperAdmin)]
         public async Task<IActionResult> UpdateUser([FromBody] User user)
         {
             try
@@ -113,6 +117,7 @@ namespace IPL.Gaming.Controllers
 
         [HttpDelete]
         [Route("{userId}")]
+        [RequireRole(UserRole.SuperAdmin)]
         public async Task<IActionResult> DeleteUser(Guid userId)
         {
             try
@@ -134,6 +139,7 @@ namespace IPL.Gaming.Controllers
         /// Manually refresh the user API key cache
         /// </summary>
         [HttpPost("RefreshCache")]
+        [RequireRole(UserRole.SuperAdmin)]
         public async Task<IActionResult> RefreshCache()
         {
             try
@@ -152,6 +158,7 @@ namespace IPL.Gaming.Controllers
         /// Get cache statistics
         /// </summary>
         [HttpGet("CacheStats")]
+        [RequireRole(UserRole.SuperAdmin)]
         public IActionResult GetCacheStats()
         {
             try

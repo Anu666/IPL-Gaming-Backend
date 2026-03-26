@@ -1,4 +1,5 @@
 using IPL.Gaming.Attributes;
+using IPL.Gaming.Common.Enums;
 using IPL.Gaming.Common.Models.CosmosDB;
 using IPL.Gaming.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -19,6 +20,7 @@ namespace IPL.Gaming.Controllers
 
         [HttpGet]
         [Route("GetAllQuestions")]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
         public async Task<IActionResult> GetAllQuestions()
         {
             try
@@ -34,6 +36,7 @@ namespace IPL.Gaming.Controllers
 
         [HttpGet]
         [Route("GetQuestionById/{questionId}")]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
         public async Task<IActionResult> GetQuestionById(Guid questionId)
         {
             try
@@ -53,6 +56,7 @@ namespace IPL.Gaming.Controllers
 
         [HttpGet]
         [Route("GetQuestionsByMatchId/{matchId}")]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
         public async Task<IActionResult> GetQuestionsByMatchId(Guid matchId)
         {
             try
@@ -68,6 +72,7 @@ namespace IPL.Gaming.Controllers
 
         [HttpPost]
         [Route("CreateQuestion")]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
         public async Task<IActionResult> CreateQuestion([FromBody] Question question)
         {
             try
@@ -98,6 +103,7 @@ namespace IPL.Gaming.Controllers
 
         [HttpPut]
         [Route("UpdateQuestion")]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
         public async Task<IActionResult> UpdateQuestion([FromBody] Question question)
         {
             try
@@ -123,6 +129,7 @@ namespace IPL.Gaming.Controllers
 
         [HttpDelete]
         [Route("DeleteQuestion/{questionId}/{matchId}")]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
         public async Task<IActionResult> DeleteQuestion(Guid questionId, Guid matchId)
         {
             try

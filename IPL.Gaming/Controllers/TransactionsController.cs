@@ -1,11 +1,12 @@
 using IPL.Gaming.Attributes;
+using IPL.Gaming.Common.Enums;
 using IPL.Gaming.Common.Models.CosmosDB;
 using IPL.Gaming.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace IPL.Gaming.Controllers
 {
-    //[ApiKey]
+    [ApiKey]
     [Route("api/[controller]")]
     [ApiController]
     public class TransactionsController : BaseController
@@ -19,6 +20,7 @@ namespace IPL.Gaming.Controllers
 
         [HttpGet]
         [Route("GetAllTransactions")]
+        [RequireRole(UserRole.SuperAdmin)]
         public async Task<IActionResult> GetAllTransactions()
         {
             try
@@ -34,6 +36,7 @@ namespace IPL.Gaming.Controllers
 
         [HttpGet]
         [Route("GetTransactionById/{transactionId}")]
+        [RequireRole(UserRole.SuperAdmin)]
         public async Task<IActionResult> GetTransactionById(Guid transactionId)
         {
             try
@@ -53,6 +56,7 @@ namespace IPL.Gaming.Controllers
 
         [HttpGet]
         [Route("GetTransactionsByUserId/{userId}")]
+        [RequireRole(UserRole.SuperAdmin)]
         public async Task<IActionResult> GetTransactionsByUserId(Guid userId)
         {
             try
@@ -68,6 +72,7 @@ namespace IPL.Gaming.Controllers
 
         [HttpGet]
         [Route("GetTransactionByMatchAndUser/{matchId}/{userId}")]
+        [RequireRole(UserRole.SuperAdmin)]
         public async Task<IActionResult> GetTransactionByMatchAndUser(Guid matchId, Guid userId)
         {
             try
@@ -87,6 +92,7 @@ namespace IPL.Gaming.Controllers
 
         [HttpPost]
         [Route("CreateTransaction")]
+        [RequireRole(UserRole.SuperAdmin)]
         public async Task<IActionResult> CreateTransaction([FromBody] Transaction transaction)
         {
             try
@@ -122,6 +128,7 @@ namespace IPL.Gaming.Controllers
 
         [HttpPut]
         [Route("UpdateTransaction")]
+        [RequireRole(UserRole.SuperAdmin)]
         public async Task<IActionResult> UpdateTransaction([FromBody] Transaction transaction)
         {
             try
@@ -147,6 +154,7 @@ namespace IPL.Gaming.Controllers
 
         [HttpDelete]
         [Route("DeleteTransaction/{transactionId}/{userId}")]
+        [RequireRole(UserRole.SuperAdmin)]
         public async Task<IActionResult> DeleteTransaction(Guid transactionId, Guid userId)
         {
             try

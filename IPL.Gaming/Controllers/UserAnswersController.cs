@@ -1,11 +1,12 @@
 using IPL.Gaming.Attributes;
+using IPL.Gaming.Common.Enums;
 using IPL.Gaming.Common.Models.CosmosDB;
 using IPL.Gaming.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace IPL.Gaming.Controllers
 {
-    //[ApiKey]
+    [ApiKey]
     [Route("api/[controller]")]
     [ApiController]
     public class UserAnswersController : BaseController
@@ -19,6 +20,7 @@ namespace IPL.Gaming.Controllers
 
         [HttpGet]
         [Route("GetAllUserAnswers")]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
         public async Task<IActionResult> GetAllUserAnswers()
         {
             try
@@ -34,6 +36,7 @@ namespace IPL.Gaming.Controllers
 
         [HttpGet]
         [Route("GetUserAnswerById/{userAnswerId}")]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
         public async Task<IActionResult> GetUserAnswerById(Guid userAnswerId)
         {
             try
@@ -53,6 +56,7 @@ namespace IPL.Gaming.Controllers
 
         [HttpGet]
         [Route("GetUserAnswersByMatchId/{matchId}")]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
         public async Task<IActionResult> GetUserAnswersByMatchId(Guid matchId)
         {
             try
@@ -68,6 +72,7 @@ namespace IPL.Gaming.Controllers
 
         [HttpGet]
         [Route("GetUserAnswerByMatchAndUser/{matchId}/{userId}")]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
         public async Task<IActionResult> GetUserAnswerByMatchAndUser(Guid matchId, Guid userId)
         {
             try
@@ -87,6 +92,7 @@ namespace IPL.Gaming.Controllers
 
         [HttpPost]
         [Route("CreateUserAnswer")]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
         public async Task<IActionResult> CreateUserAnswer([FromBody] UserAnswer userAnswer)
         {
             try
@@ -122,6 +128,7 @@ namespace IPL.Gaming.Controllers
 
         [HttpPut]
         [Route("UpdateUserAnswer")]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
         public async Task<IActionResult> UpdateUserAnswer([FromBody] UserAnswer userAnswer)
         {
             try
@@ -147,6 +154,7 @@ namespace IPL.Gaming.Controllers
 
         [HttpDelete]
         [Route("DeleteUserAnswer/{userAnswerId}/{matchId}")]
+        [RequireRole(UserRole.SuperAdmin)]
         public async Task<IActionResult> DeleteUserAnswer(Guid userAnswerId, Guid matchId)
         {
             try

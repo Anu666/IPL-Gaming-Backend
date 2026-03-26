@@ -4,6 +4,7 @@ namespace IPL.Gaming.Common.Enums
     {
         Player = 0,
         Moderator = 1,
-        Admin = 2
+        Admin = 2,
+        SuperAdmin = 3
     }
 }
