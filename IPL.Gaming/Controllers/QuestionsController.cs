@@ -57,7 +57,7 @@ namespace IPL.Gaming.Controllers
 
         [HttpGet]
         [Route("GetQuestionsByMatchId/{matchId}")]
-        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin, UserRole.Player)]
         public async Task<IActionResult> GetQuestionsByMatchId(Guid matchId)
         {
             try

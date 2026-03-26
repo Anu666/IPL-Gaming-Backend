@@ -13,10 +13,12 @@ namespace IPL.Gaming.Controllers
     public class UserAnswersController : BaseController
     {
         private readonly IUserAnswerService _userAnswerService;
+        private readonly IMatchService _matchService;
 
-        public UserAnswersController(IUserAnswerService userAnswerService)
+        public UserAnswersController(IUserAnswerService userAnswerService, IMatchService matchService)
         {
             _userAnswerService = userAnswerService;
+            _matchService = matchService;
         }
 
         [HttpGet]
@@ -73,7 +75,7 @@ namespace IPL.Gaming.Controllers
 
         [HttpGet]
         [Route("GetUserAnswerByMatchAndUser/{matchId}/{userId}")]
-        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin, UserRole.Player)]
         public async Task<IActionResult> GetUserAnswerByMatchAndUser(Guid matchId, Guid userId)
         {
             try
@@ -93,7 +95,7 @@ namespace IPL.Gaming.Controllers
 
         [HttpPost]
         [Route("CreateUserAnswer")]
-        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin, UserRole.Player)]
         public async Task<IActionResult> CreateUserAnswer([FromBody] CreateUserAnswerRequest request)
         {
             try
@@ -110,6 +112,19 @@ namespace IPL.Gaming.Controllers
                 if (request.Answers == null || request.Answers.Count == 0)
                     return BadRequest(new { message = "At least one answer is required" });
 
+                if (CurrentUserRole != UserRole.SuperAdmin && request.UserId != CurrentUserId)
+                    return StatusCode(403, new { message = "You can only submit answers for yourself." });
+
+                var match = await _matchService.GetMatchById(request.MatchId);
+                if (match == null)
+                    return NotFound(new { message = $"Match with ID {request.MatchId} not found" });
+
+                // MatchCommenceStartDate is stored as IST wall-clock time (no timezone indicator).
+                // Convert UtcNow to IST (UTC+5:30) and compare directly to avoid server-timezone issues.
+                var nowIst = DateTime.UtcNow.AddHours(5).AddMinutes(30);
+                if (nowIst >= match.MatchCommenceStartDate)
+                    return StatusCode(403, new { message = "Picks are locked. The match has already started." });
+
                 var userAnswer = UserAnswerMapper.ToUserAnswer(request);
                 var created = await _userAnswerService.CreateUserAnswer(userAnswer);
                 return CreatedAtAction(nameof(GetUserAnswerById), new { userAnswerId = created.Id }, created);
@@ -122,7 +137,7 @@ namespace IPL.Gaming.Controllers
 
         [HttpPut]
         [Route("UpdateUserAnswer")]
-        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin, UserRole.Player)]
         public async Task<IActionResult> UpdateUserAnswer([FromBody] UpdateUserAnswerRequest request)
         {
             try
@@ -132,6 +147,19 @@ namespace IPL.Gaming.Controllers
 
                 if (request.MatchId == Guid.Empty)
                     return BadRequest(new { message = "A valid Match ID is required" });
+
+                if (CurrentUserRole != UserRole.SuperAdmin && request.UserId != CurrentUserId)
+                    return StatusCode(403, new { message = "You can only update your own answers." });
+
+                var match = await _matchService.GetMatchById(request.MatchId);
+                if (match == null)
+                    return NotFound(new { message = $"Match with ID {request.MatchId} not found" });
+
+                // MatchCommenceStartDate is stored as IST wall-clock time (no timezone indicator).
+                // Convert UtcNow to IST (UTC+5:30) and compare directly to avoid server-timezone issues.
+                var nowIst = DateTime.UtcNow.AddHours(5).AddMinutes(30);
+                if (nowIst >= match.MatchCommenceStartDate)
+                    return StatusCode(403, new { message = "Picks are locked. The match has already started." });
 
                 var userAnswer = UserAnswerMapper.ToUserAnswer(request);
                 var updated = await _userAnswerService.UpdateUserAnswer(userAnswer);
