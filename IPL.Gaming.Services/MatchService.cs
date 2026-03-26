@@ -33,8 +33,9 @@ namespace IPL.Gaming.Services
 
         public async Task<Match> CreateMatch(Match match)
         {
-            // Always generate new ID (ignore any provided ID)
-            match.Id = Guid.NewGuid();
+            // Preserve the provided ID; only generate a new one if none was given
+            if (match.Id == Guid.Empty)
+                match.Id = Guid.NewGuid();
 
             return await _matchRepository.CreateMatch(match);
         }
