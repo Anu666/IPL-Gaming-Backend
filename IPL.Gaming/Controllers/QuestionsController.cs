@@ -1,6 +1,7 @@
 using IPL.Gaming.Attributes;
 using IPL.Gaming.Common.Enums;
-using IPL.Gaming.Common.Models.CosmosDB;
+using IPL.Gaming.Common.Mappers;
+using IPL.Gaming.Common.Models.Requests;
 using IPL.Gaming.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -73,25 +74,20 @@ namespace IPL.Gaming.Controllers
         [HttpPost]
         [Route("CreateQuestion")]
         [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
-        public async Task<IActionResult> CreateQuestion([FromBody] Question question)
+        public async Task<IActionResult> CreateQuestion([FromBody] CreateQuestionRequest request)
         {
             try
             {
-                if (question == null)
-                {
-                    return BadRequest(new { message = "Question data is required" });
-                }
+                if (request == null)
+                    return BadRequest(new { message = "Request body is required" });
 
-                if (string.IsNullOrWhiteSpace(question.QuestionText))
-                {
+                if (string.IsNullOrWhiteSpace(request.QuestionText))
                     return BadRequest(new { message = "Question text is required" });
-                }
 
-                if (question.MatchId == Guid.Empty)
-                {
+                if (request.MatchId == Guid.Empty)
                     return BadRequest(new { message = "A valid Match ID is required" });
-                }
 
+                var question = QuestionMapper.ToQuestion(request);
                 var createdQuestion = await _questionService.CreateQuestion(question);
                 return CreatedAtAction(nameof(GetQuestionById), new { questionId = createdQuestion.Id }, createdQuestion);
             }
@@ -104,20 +100,17 @@ namespace IPL.Gaming.Controllers
         [HttpPut]
         [Route("UpdateQuestion")]
         [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
-        public async Task<IActionResult> UpdateQuestion([FromBody] Question question)
+        public async Task<IActionResult> UpdateQuestion([FromBody] UpdateQuestionRequest request)
         {
             try
             {
-                if (question == null || question.Id == Guid.Empty)
-                {
-                    return BadRequest(new { message = "Question data with valid ID is required" });
-                }
+                if (request == null || request.Id == Guid.Empty)
+                    return BadRequest(new { message = "Request body with valid ID is required" });
 
-                if (question.MatchId == Guid.Empty)
-                {
+                if (request.MatchId == Guid.Empty)
                     return BadRequest(new { message = "A valid Match ID is required" });
-                }
 
+                var question = QuestionMapper.ToQuestion(request);
                 var updatedQuestion = await _questionService.UpdateQuestion(question);
                 return Ok(updatedQuestion);
             }

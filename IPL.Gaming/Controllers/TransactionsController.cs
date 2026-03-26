@@ -1,6 +1,7 @@
 using IPL.Gaming.Attributes;
 using IPL.Gaming.Common.Enums;
-using IPL.Gaming.Common.Models.CosmosDB;
+using IPL.Gaming.Common.Mappers;
+using IPL.Gaming.Common.Models.Requests;
 using IPL.Gaming.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -93,30 +94,23 @@ namespace IPL.Gaming.Controllers
         [HttpPost]
         [Route("CreateTransaction")]
         [RequireRole(UserRole.SuperAdmin)]
-        public async Task<IActionResult> CreateTransaction([FromBody] Transaction transaction)
+        public async Task<IActionResult> CreateTransaction([FromBody] CreateTransactionRequest request)
         {
             try
             {
-                if (transaction == null)
-                {
-                    return BadRequest(new { message = "Transaction data is required" });
-                }
+                if (request == null)
+                    return BadRequest(new { message = "Request body is required" });
 
-                if (transaction.UserId == Guid.Empty)
-                {
+                if (request.UserId == Guid.Empty)
                     return BadRequest(new { message = "A valid User ID is required" });
-                }
 
-                if (transaction.MatchId == Guid.Empty)
-                {
+                if (request.MatchId == Guid.Empty)
                     return BadRequest(new { message = "A valid Match ID is required" });
-                }
 
-                if (transaction.Changes == null || transaction.Changes.Count == 0)
-                {
+                if (request.Changes == null || request.Changes.Count == 0)
                     return BadRequest(new { message = "At least one change entry is required" });
-                }
 
+                var transaction = TransactionMapper.ToTransaction(request);
                 var created = await _transactionService.CreateTransaction(transaction);
                 return CreatedAtAction(nameof(GetTransactionById), new { transactionId = created.Id }, created);
             }
@@ -129,20 +123,17 @@ namespace IPL.Gaming.Controllers
         [HttpPut]
         [Route("UpdateTransaction")]
         [RequireRole(UserRole.SuperAdmin)]
-        public async Task<IActionResult> UpdateTransaction([FromBody] Transaction transaction)
+        public async Task<IActionResult> UpdateTransaction([FromBody] UpdateTransactionRequest request)
         {
             try
             {
-                if (transaction == null || transaction.Id == Guid.Empty)
-                {
-                    return BadRequest(new { message = "Transaction data with valid ID is required" });
-                }
+                if (request == null || request.Id == Guid.Empty)
+                    return BadRequest(new { message = "Request body with valid ID is required" });
 
-                if (transaction.UserId == Guid.Empty)
-                {
+                if (request.UserId == Guid.Empty)
                     return BadRequest(new { message = "A valid User ID is required" });
-                }
 
+                var transaction = TransactionMapper.ToTransaction(request);
                 var updated = await _transactionService.UpdateTransaction(transaction);
                 return Ok(updated);
             }

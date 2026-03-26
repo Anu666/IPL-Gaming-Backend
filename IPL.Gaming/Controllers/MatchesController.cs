@@ -1,6 +1,7 @@
 using IPL.Gaming.Attributes;
 using IPL.Gaming.Common.Enums;
-using IPL.Gaming.Common.Models.CosmosDB;
+using IPL.Gaming.Common.Mappers;
+using IPL.Gaming.Common.Models.Requests;
 using IPL.Gaming.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -74,20 +75,17 @@ namespace IPL.Gaming.Controllers
         [HttpPost]
         [Route("CreateMatch")]
         [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
-        public async Task<IActionResult> CreateMatch([FromBody] Match match)
+        public async Task<IActionResult> CreateMatch([FromBody] CreateMatchRequest request)
         {
             try
             {
-                if (match == null)
-                {
-                    return BadRequest(new { message = "Match data is required" });
-                }
+                if (request == null)
+                    return BadRequest(new { message = "Request body is required" });
 
-                if (string.IsNullOrEmpty(match.MatchName))
-                {
+                if (string.IsNullOrWhiteSpace(request.MatchName))
                     return BadRequest(new { message = "Match name is required" });
-                }
 
+                var match = MatchMapper.ToMatch(request);
                 var createdMatch = await _matchService.CreateMatch(match);
                 return CreatedAtAction(nameof(GetMatchById), new { matchId = createdMatch.Id }, createdMatch);
             }
@@ -100,15 +98,14 @@ namespace IPL.Gaming.Controllers
         [HttpPut]
         [Route("UpdateMatch")]
         [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
-        public async Task<IActionResult> UpdateMatch([FromBody] Match match)
+        public async Task<IActionResult> UpdateMatch([FromBody] UpdateMatchRequest request)
         {
             try
             {
-                if (match == null || match.Id == Guid.Empty)
-                {
-                    return BadRequest(new { message = "Match data with valid ID is required" });
-                }
+                if (request == null || request.Id == Guid.Empty)
+                    return BadRequest(new { message = "Request body with valid ID is required" });
 
+                var match = MatchMapper.ToMatch(request);
                 var updatedMatch = await _matchService.UpdateMatch(match);
                 return Ok(updatedMatch);
             }

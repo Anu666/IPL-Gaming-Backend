@@ -1,6 +1,8 @@
 ﻿using IPL.Gaming.Attributes;
 using IPL.Gaming.Common.Enums;
+using IPL.Gaming.Common.Mappers;
 using IPL.Gaming.Common.Models.CosmosDB;
+using IPL.Gaming.Common.Models.Requests;
 using IPL.Gaming.Services;
 using IPL.Gaming.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -72,20 +74,17 @@ namespace IPL.Gaming.Controllers
 
         [HttpPost]
         [RequireRole(UserRole.SuperAdmin)]
-        public async Task<IActionResult> CreateUser([FromBody] User user)
+        public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest request)
         {
             try
             {
-                if (user == null)
-                {
-                    return BadRequest(new { message = "User data is required" });
-                }
+                if (request == null)
+                    return BadRequest(new { message = "Request body is required" });
 
-                if (string.IsNullOrEmpty(user.Name))
-                {
+                if (string.IsNullOrWhiteSpace(request.Name))
                     return BadRequest(new { message = "User name is required" });
-                }
 
+                var user = UserMapper.ToUser(request);
                 var createdUser = await _userService.CreateUser(user);
                 return CreatedAtAction(nameof(GetUserById), new { userId = createdUser.Id }, createdUser);
             }
@@ -97,15 +96,18 @@ namespace IPL.Gaming.Controllers
 
         [HttpPut]
         [RequireRole(UserRole.SuperAdmin)]
-        public async Task<IActionResult> UpdateUser([FromBody] User user)
+        public async Task<IActionResult> UpdateUser([FromBody] UpdateUserRequest request)
         {
             try
             {
-                if (user == null || user.Id == Guid.Empty)
-                {
-                    return BadRequest(new { message = "User data with valid ID is required" });
-                }
+                if (request == null || request.Id == Guid.Empty)
+                    return BadRequest(new { message = "Request body with valid ID is required" });
 
+                var existingUser = await _userService.GetUserById(request.Id);
+                if (existingUser == null)
+                    return NotFound(new { message = $"User with ID {request.Id} not found" });
+
+                var user = UserMapper.ApplyUpdate(request, existingUser);
                 var updatedUser = await _userService.UpdateUser(user);
                 return Ok(updatedUser);
             }
@@ -122,6 +124,17 @@ namespace IPL.Gaming.Controllers
         {
             try
             {
+                var userToDelete = await _userService.GetUserById(userId);
+                if (userToDelete == null)
+                {
+                    return NotFound(new { message = $"User with ID {userId} not found" });
+                }
+
+                if (userToDelete.Role == UserRole.SuperAdmin)
+                {
+                    return BadRequest(new { message = "Super Admin users cannot be deleted" });
+                }
+
                 var result = await _userService.DeleteUser(userId);
                 if (!result)
                 {
@@ -169,6 +182,47 @@ namespace IPL.Gaming.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "Error getting cache stats", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Get the currently authenticated user's own details (any authenticated user)
+        /// </summary>
+        [HttpGet("me")]
+        public IActionResult GetMe()
+        {
+            var user = CurrentUser;
+            if (user == null)
+            {
+                return Unauthorized(new { message = "Authenticated user not found in context." });
+            }
+            return Ok(user);
+        }
+
+        /// <summary>
+        /// Update credits for a specific user without modifying any other fields
+        /// </summary>
+        [HttpPatch("{userId}/credits")]
+        [RequireRole(UserRole.SuperAdmin)]
+        public async Task<IActionResult> UpdateCredits(Guid userId, [FromBody] UpdateCreditsRequest request)
+        {
+            try
+            {
+                var existingUser = await _userService.GetUserById(userId);
+                if (existingUser == null)
+                {
+                    return NotFound(new { message = $"User with ID {userId} not found" });
+                }
+
+                existingUser.Credits = request.Operation == Common.Models.Requests.CreditsOperation.Increase
+                    ? existingUser.Credits + request.Credits
+                    : request.Credits;
+                var updatedUser = await _userService.UpdateUser(existingUser);
+                return Ok(updatedUser);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
             }
         }
     }

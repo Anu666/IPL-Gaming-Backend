@@ -1,6 +1,7 @@
 using IPL.Gaming.Attributes;
 using IPL.Gaming.Common.Enums;
-using IPL.Gaming.Common.Models.CosmosDB;
+using IPL.Gaming.Common.Mappers;
+using IPL.Gaming.Common.Models.Requests;
 using IPL.Gaming.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -93,30 +94,23 @@ namespace IPL.Gaming.Controllers
         [HttpPost]
         [Route("CreateUserAnswer")]
         [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
-        public async Task<IActionResult> CreateUserAnswer([FromBody] UserAnswer userAnswer)
+        public async Task<IActionResult> CreateUserAnswer([FromBody] CreateUserAnswerRequest request)
         {
             try
             {
-                if (userAnswer == null)
-                {
-                    return BadRequest(new { message = "UserAnswer data is required" });
-                }
+                if (request == null)
+                    return BadRequest(new { message = "Request body is required" });
 
-                if (userAnswer.MatchId == Guid.Empty)
-                {
+                if (request.MatchId == Guid.Empty)
                     return BadRequest(new { message = "A valid Match ID is required" });
-                }
 
-                if (userAnswer.UserId == Guid.Empty)
-                {
+                if (request.UserId == Guid.Empty)
                     return BadRequest(new { message = "A valid User ID is required" });
-                }
 
-                if (userAnswer.Answers == null || userAnswer.Answers.Count == 0)
-                {
+                if (request.Answers == null || request.Answers.Count == 0)
                     return BadRequest(new { message = "At least one answer is required" });
-                }
 
+                var userAnswer = UserAnswerMapper.ToUserAnswer(request);
                 var created = await _userAnswerService.CreateUserAnswer(userAnswer);
                 return CreatedAtAction(nameof(GetUserAnswerById), new { userAnswerId = created.Id }, created);
             }
@@ -129,20 +123,17 @@ namespace IPL.Gaming.Controllers
         [HttpPut]
         [Route("UpdateUserAnswer")]
         [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
-        public async Task<IActionResult> UpdateUserAnswer([FromBody] UserAnswer userAnswer)
+        public async Task<IActionResult> UpdateUserAnswer([FromBody] UpdateUserAnswerRequest request)
         {
             try
             {
-                if (userAnswer == null || userAnswer.Id == Guid.Empty)
-                {
-                    return BadRequest(new { message = "UserAnswer data with valid ID is required" });
-                }
+                if (request == null || request.Id == Guid.Empty)
+                    return BadRequest(new { message = "Request body with valid ID is required" });
 
-                if (userAnswer.MatchId == Guid.Empty)
-                {
+                if (request.MatchId == Guid.Empty)
                     return BadRequest(new { message = "A valid Match ID is required" });
-                }
 
+                var userAnswer = UserAnswerMapper.ToUserAnswer(request);
                 var updated = await _userAnswerService.UpdateUserAnswer(userAnswer);
                 return Ok(updated);
             }

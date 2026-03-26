@@ -35,5 +35,8 @@ namespace IPL.Gaming.Common.Models.CosmosDB
 
         [JsonProperty(PropertyName = "role")]
         public UserRole Role { get; set; }
+
+        [JsonProperty(PropertyName = "credits")]
+        public float Credits { get; set; }
     }
 }
