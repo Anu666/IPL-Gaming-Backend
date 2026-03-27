@@ -21,7 +21,7 @@ namespace IPL.Gaming.Controllers
 
         [HttpGet]
         [Route("GetAllMatchStatuses")]
-        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin, UserRole.Player)]
         public async Task<IActionResult> GetAllMatchStatuses()
         {
             try
@@ -56,7 +56,7 @@ namespace IPL.Gaming.Controllers
 
         [HttpGet]
         [Route("GetMatchStatusByMatchId/{matchId}")]
-        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin, UserRole.Player)]
         public async Task<IActionResult> GetMatchStatusByMatchId(Guid matchId)
         {
             try

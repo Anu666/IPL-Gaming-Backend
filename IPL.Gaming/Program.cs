@@ -47,6 +47,9 @@ builder.Services.AddScoped<IMatchStatusService, MatchStatusService>();
 builder.Services.AddSingleton<UserCacheService>();
 builder.Services.AddHostedService(provider => provider.GetRequiredService<UserCacheService>());
 
+// Register background jobs
+builder.Services.AddHostedService<PicksLockJob>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

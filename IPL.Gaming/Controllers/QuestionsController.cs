@@ -13,10 +13,12 @@ namespace IPL.Gaming.Controllers
     public class QuestionsController : BaseController
     {
         private readonly IQuestionService _questionService;
+        private readonly IMatchStatusService _matchStatusService;
 
-        public QuestionsController(IQuestionService questionService)
+        public QuestionsController(IQuestionService questionService, IMatchStatusService matchStatusService)
         {
             _questionService = questionService;
+            _matchStatusService = matchStatusService;
         }
 
         [HttpGet]
@@ -87,6 +89,10 @@ namespace IPL.Gaming.Controllers
                 if (request.MatchId == Guid.Empty)
                     return BadRequest(new { message = "A valid Match ID is required" });
 
+                var matchStatus = await _matchStatusService.GetMatchStatusByMatchId(request.MatchId);
+                if (matchStatus != null && matchStatus.Status != MatchStatus.NotStarted)
+                    return StatusCode(403, new { message = "Questions are locked. Match status must be Not Started to add questions." });
+
                 var question = QuestionMapper.ToQuestion(request);
                 var createdQuestion = await _questionService.CreateQuestion(question);
                 return CreatedAtAction(nameof(GetQuestionById), new { questionId = createdQuestion.Id }, createdQuestion);
@@ -110,6 +116,10 @@ namespace IPL.Gaming.Controllers
                 if (request.MatchId == Guid.Empty)
                     return BadRequest(new { message = "A valid Match ID is required" });
 
+                var matchStatus = await _matchStatusService.GetMatchStatusByMatchId(request.MatchId);
+                if (matchStatus != null && matchStatus.Status != MatchStatus.NotStarted)
+                    return StatusCode(403, new { message = "Questions are locked. Match status must be Not Started to update questions." });
+
                 var question = QuestionMapper.ToQuestion(request);
                 var updatedQuestion = await _questionService.UpdateQuestion(question);
                 return Ok(updatedQuestion);
@@ -127,6 +137,10 @@ namespace IPL.Gaming.Controllers
         {
             try
             {
+                var matchStatus = await _matchStatusService.GetMatchStatusByMatchId(matchId);
+                if (matchStatus != null && matchStatus.Status != MatchStatus.NotStarted)
+                    return StatusCode(403, new { message = "Questions are locked. Match status must be Not Started to delete questions." });
+
                 var result = await _questionService.DeleteQuestion(questionId, matchId);
                 if (!result)
                 {
