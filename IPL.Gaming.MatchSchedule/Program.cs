@@ -11,7 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 
-Console.WriteLine("IPL Gaming - Match Schedule Import");
+Console.WriteLine("IPL Gaming - Match Status Import");
 Console.WriteLine("===================================\n");
 
 // Load configuration
@@ -30,57 +30,67 @@ services.AddSingleton(cosmosDbSettings);
 services.AddScoped<ICosmosService, CosmosService>();
 services.AddScoped<IMatchRepository, MatchRepository>();
 services.AddScoped<IMatchService, MatchService>();
+services.AddScoped<IMatchStatusRepository, MatchStatusRepository>();
+services.AddScoped<IMatchStatusService, MatchStatusService>();
 
 var serviceProvider = services.BuildServiceProvider();
 
 try
 {
-    Console.WriteLine("Reading match-schedule-simplified.json...");
-    var jsonFilePath = Path.Combine(Directory.GetCurrentDirectory(), "match-schedule-simplified.json");
+    // -----------------------------------------------------------------------
+    // Match import (already done — commented out)
+    // -----------------------------------------------------------------------
+    //Console.WriteLine("Reading match-schedule-simplified.json...");
+    //var jsonFilePath = Path.Combine(Directory.GetCurrentDirectory(), "match-schedule-simplified.json");
 
-    if (!File.Exists(jsonFilePath))
-    {
-        Console.WriteLine($"Error: match-schedule-simplified.json not found at {jsonFilePath}");
-        return;
-    }
+    //if (!File.Exists(jsonFilePath))
+    //{
+    //    Console.WriteLine($"Error: match-schedule-simplified.json not found at {jsonFilePath}");
+    //    return;
+    //}
 
-    var jsonContent = File.ReadAllText(jsonFilePath);
-    var matches = JsonConvert.DeserializeObject<List<Match>>(jsonContent);
+    //var jsonContent = File.ReadAllText(jsonFilePath);
+    //var matches = JsonConvert.DeserializeObject<List<Match>>(jsonContent);
 
-    if (matches == null || !matches.Any())
-    {
-        Console.WriteLine("No matches found in the schedule.");
-        return;
-    }
+    //if (matches == null || !matches.Any())
+    //{
+    //    Console.WriteLine("No matches found in the schedule.");
+    //    return;
+    //}
 
-    Console.WriteLine($"Found {matches.Count} matches in the schedule.\n");
+    //Console.WriteLine($"Found {matches.Count} matches in the schedule.\n");
 
-    var matchService = serviceProvider.GetRequiredService<IMatchService>();
+    //var matchService = serviceProvider.GetRequiredService<IMatchService>();
+    //int successCount = 0;
+    //int failureCount = 0;
 
-    int successCount = 0;
-    int failureCount = 0;
+    //foreach (var match in matches)
+    //{
+    //    try
+    //    {
+    //        var createdMatch = await matchService.CreateMatch(match);
+    //        Console.WriteLine($"✓ Inserted: {createdMatch.MatchName} (ID: {createdMatch.Id})");
+    //        successCount++;
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        Console.WriteLine($"✗ Failed to insert: {match.MatchName}");
+    //        Console.WriteLine($"  Error: {ex.Message}");
+    //        failureCount++;
+    //    }
+    //}
 
-    foreach (var match in matches)
-    {
-        try
-        {
-            var createdMatch = await matchService.CreateMatch(match);
-            Console.WriteLine($"✓ Inserted: {createdMatch.MatchName} (ID: {createdMatch.Id})");
-            successCount++;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"✗ Failed to insert: {match.MatchName}");
-            Console.WriteLine($"  Error: {ex.Message}");
-            failureCount++;
-        }
-    }
+    //Console.WriteLine($"\n===================================");
+    //Console.WriteLine($"Import completed!");
+    //Console.WriteLine($"Success: {successCount} matches");
+    //Console.WriteLine($"Failed:  {failureCount} matches");
+    //Console.WriteLine($"===================================\n");
+    // -----------------------------------------------------------------------
 
-    Console.WriteLine($"\n===================================");
-    Console.WriteLine($"Import completed!");
-    Console.WriteLine($"Success: {successCount} matches");
-    Console.WriteLine($"Failed:  {failureCount} matches");
-    Console.WriteLine($"===================================");
+    var matchStatusImporter = new MatchStatusImporter(
+        serviceProvider.GetRequiredService<IMatchService>(),
+        serviceProvider.GetRequiredService<IMatchStatusService>());
+    await matchStatusImporter.Run();
 }
 catch (Exception ex)
 {

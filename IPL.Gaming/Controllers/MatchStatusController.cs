@@ -1,0 +1,141 @@
+using IPL.Gaming.Attributes;
+using IPL.Gaming.Common.Enums;
+using IPL.Gaming.Common.Mappers;
+using IPL.Gaming.Common.Models.Requests;
+using IPL.Gaming.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+
+namespace IPL.Gaming.Controllers
+{
+    [ApiKey]
+    [Route("api/[controller]")]
+    [ApiController]
+    public class MatchStatusController : BaseController
+    {
+        private readonly IMatchStatusService _matchStatusService;
+
+        public MatchStatusController(IMatchStatusService matchStatusService)
+        {
+            _matchStatusService = matchStatusService;
+        }
+
+        [HttpGet]
+        [Route("GetAllMatchStatuses")]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
+        public async Task<IActionResult> GetAllMatchStatuses()
+        {
+            try
+            {
+                var statuses = await _matchStatusService.GetAllMatchStatuses();
+                return Ok(statuses);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        [Route("GetMatchStatusById/{matchStatusId}")]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
+        public async Task<IActionResult> GetMatchStatusById(Guid matchStatusId)
+        {
+            try
+            {
+                var status = await _matchStatusService.GetMatchStatusById(matchStatusId);
+                if (status == null)
+                    return NotFound(new { message = $"MatchStatus with ID {matchStatusId} not found" });
+
+                return Ok(status);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        [Route("GetMatchStatusByMatchId/{matchId}")]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
+        public async Task<IActionResult> GetMatchStatusByMatchId(Guid matchId)
+        {
+            try
+            {
+                var status = await _matchStatusService.GetMatchStatusByMatchId(matchId);
+                if (status == null)
+                    return NotFound(new { message = $"No status found for match {matchId}" });
+
+                return Ok(status);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        [Route("CreateMatchStatus")]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
+        public async Task<IActionResult> CreateMatchStatus([FromBody] CreateMatchStatusRequest request)
+        {
+            try
+            {
+                if (request == null)
+                    return BadRequest(new { message = "Request body is required" });
+
+                if (request.MatchId == Guid.Empty)
+                    return BadRequest(new { message = "A valid Match ID is required" });
+
+                var matchStatus = MatchStatusMapper.ToMatchStatusRecord(request);
+                var created = await _matchStatusService.CreateMatchStatus(matchStatus);
+                return CreatedAtAction(nameof(GetMatchStatusById), new { matchStatusId = created.Id }, created);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPut]
+        [Route("UpdateMatchStatus")]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
+        public async Task<IActionResult> UpdateMatchStatus([FromBody] UpdateMatchStatusRequest request)
+        {
+            try
+            {
+                if (request == null || request.Id == Guid.Empty)
+                    return BadRequest(new { message = "Request body with valid ID is required" });
+
+                if (request.MatchId == Guid.Empty)
+                    return BadRequest(new { message = "A valid Match ID is required" });
+
+                var matchStatus = MatchStatusMapper.ToMatchStatusRecord(request);
+                var updated = await _matchStatusService.UpdateMatchStatus(matchStatus);
+                return Ok(updated);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpDelete]
+        [Route("DeleteMatchStatus/{matchStatusId}/{matchId}")]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
+        public async Task<IActionResult> DeleteMatchStatus(Guid matchStatusId, Guid matchId)
+        {
+            try
+            {
+                var result = await _matchStatusService.DeleteMatchStatus(matchStatusId, matchId);
+                if (!result)
+                    return NotFound(new { message = $"MatchStatus with ID {matchStatusId} not found or could not be deleted" });
+
+                return Ok(new { message = "MatchStatus deleted successfully" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+    }
+}

@@ -15,6 +15,7 @@ namespace IPL.Gaming.Store
         public const string Question = "question";
         public const string UserAnswer = "useranswer";
         public const string Transaction = "transaction";
+        public const string MatchStatus = "matchstatus";
 
         public DataStore()
         {
