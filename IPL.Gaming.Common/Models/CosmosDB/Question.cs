@@ -24,5 +24,8 @@ namespace IPL.Gaming.Common.Models.CosmosDB
 
         [JsonProperty("correctOptionId")]
         public int? CorrectOptionId { get; set; }
+
+        [JsonProperty("bettingStats")]
+        public QuestionBettingStats? BettingStats { get; set; }
     }
 }

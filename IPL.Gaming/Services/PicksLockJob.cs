@@ -101,6 +101,16 @@ namespace IPL.Gaming.Services
                         await matchStatusService.UpdateMatchStatus(statusRecord);
                         Console.WriteLine($"[PicksLockJob] Locked: {match.MatchName} (commenced {match.MatchCommenceStartDate:dd MMM HH:mm})");
                         locked++;
+
+                        try
+                        {
+                            var bettingStatsService = scope.ServiceProvider.GetRequiredService<IBettingStatsService>();
+                            await bettingStatsService.CalculateAndUpdateBettingStats(statusRecord.MatchId);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"[PicksLockJob] Betting stats failed for match {statusRecord.MatchId}: {ex.Message}");
+                        }
                     }
                 }
                 catch (Exception ex)
