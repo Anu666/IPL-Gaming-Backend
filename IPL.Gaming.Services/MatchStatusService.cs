@@ -8,10 +8,14 @@ namespace IPL.Gaming.Services
     public class MatchStatusService : IMatchStatusService
     {
         private readonly IMatchStatusRepository _matchStatusRepository;
+        private readonly ILeaderboardService _leaderboardService;
 
-        public MatchStatusService(IMatchStatusRepository matchStatusRepository)
+        public MatchStatusService(
+            IMatchStatusRepository matchStatusRepository,
+            ILeaderboardService leaderboardService)
         {
             _matchStatusRepository = matchStatusRepository;
+            _leaderboardService    = leaderboardService;
         }
 
         public async Task<List<MatchStatusRecord>> GetAllMatchStatuses()
@@ -84,7 +88,10 @@ namespace IPL.Gaming.Services
             if (existing.Status != MatchStatus.TransactionsSettled)
                 throw new InvalidOperationException($"Match status must be 'TransactionsSettled' to mark as done. Current status: {existing.Status}");
 
-            existing.Status = MatchStatus.Done;
+            existing.Status      = MatchStatus.Done;
+            existing.CompletedAt = DateTime.UtcNow;
+            existing.Leaderboard = await _leaderboardService.CalculateCumulativeLeaderboard(matchId);
+
             return await _matchStatusRepository.UpdateMatchStatus(existing);
         }
 

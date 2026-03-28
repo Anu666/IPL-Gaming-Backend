@@ -44,6 +44,7 @@ builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<IMatchStatusService, MatchStatusService>();
 builder.Services.AddScoped<IBettingStatsService, BettingStatsService>();
 builder.Services.AddScoped<IBetSettlementService, BetSettlementService>();
+builder.Services.AddScoped<ILeaderboardService, LeaderboardService>();
 
 // Register User Cache Service (Singleton for caching, Hosted Service for startup loading)
 builder.Services.AddSingleton<UserCacheService>();

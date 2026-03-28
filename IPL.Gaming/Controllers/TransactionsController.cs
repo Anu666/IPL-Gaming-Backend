@@ -72,6 +72,25 @@ namespace IPL.Gaming.Controllers
         }
 
         [HttpGet]
+        [Route("GetMyTransactions")]
+        public async Task<IActionResult> GetMyTransactions()
+        {
+            try
+            {
+                var userId = CurrentUserId;
+                if (userId == null || userId == Guid.Empty)
+                    return Unauthorized(new { message = "Could not resolve the current user." });
+
+                var transactions = await _transactionService.GetTransactionsByUserId(userId.Value);
+                return Ok(transactions);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpGet]
         [Route("GetTransactionByMatchAndUser/{matchId}/{userId}")]
         [RequireRole(UserRole.SuperAdmin)]
         public async Task<IActionResult> GetTransactionByMatchAndUser(Guid matchId, Guid userId)
