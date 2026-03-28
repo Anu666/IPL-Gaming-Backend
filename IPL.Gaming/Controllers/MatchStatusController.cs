@@ -137,5 +137,49 @@ namespace IPL.Gaming.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }
+
+        [HttpPost]
+        [Route("MarkMatchComplete/{matchId}")]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
+        public async Task<IActionResult> MarkMatchComplete(Guid matchId)
+        {
+            try
+            {
+                var updated = await _matchStatusService.MarkMatchComplete(matchId);
+                return Ok(updated);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPut]
+        [Route("OverrideMatchStatus/{matchId}")]
+        [RequireRole(UserRole.SuperAdmin)]
+        public async Task<IActionResult> OverrideMatchStatus(Guid matchId, [FromBody] OverrideStatusRequest request)
+        {
+            try
+            {
+                if (request == null)
+                    return BadRequest(new { message = "Request body is required" });
+
+                var updated = await _matchStatusService.OverrideMatchStatus(matchId, request.Status);
+                return Ok(updated);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+    }
+
+    public class OverrideStatusRequest
+    {
+        public MatchStatus Status { get; set; }
     }
 }

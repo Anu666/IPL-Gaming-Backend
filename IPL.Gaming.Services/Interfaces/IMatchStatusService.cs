@@ -1,3 +1,4 @@
+using IPL.Gaming.Common.Enums;
 using IPL.Gaming.Common.Models.CosmosDB;
 
 namespace IPL.Gaming.Services.Interfaces
@@ -9,6 +10,8 @@ namespace IPL.Gaming.Services.Interfaces
         Task<MatchStatusRecord> GetMatchStatusByMatchId(Guid matchId);
         Task<MatchStatusRecord> CreateMatchStatus(MatchStatusRecord matchStatus);
         Task<MatchStatusRecord> UpdateMatchStatus(MatchStatusRecord matchStatus);
+        Task<MatchStatusRecord> MarkMatchComplete(Guid matchId);
+        Task<MatchStatusRecord> OverrideMatchStatus(Guid matchId, MatchStatus status);
         Task<bool> DeleteMatchStatus(Guid matchStatusId, Guid matchId);
     }
 }

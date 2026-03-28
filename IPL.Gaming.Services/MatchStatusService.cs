@@ -1,3 +1,4 @@
+using IPL.Gaming.Common.Enums;
 using IPL.Gaming.Common.Models.CosmosDB;
 using IPL.Gaming.Repository.Interfaces;
 using IPL.Gaming.Services.Interfaces;
@@ -46,6 +47,29 @@ namespace IPL.Gaming.Services
         public async Task<bool> DeleteMatchStatus(Guid matchStatusId, Guid matchId)
         {
             return await _matchStatusRepository.DeleteMatchStatus(matchStatusId, matchId);
+        }
+
+        public async Task<MatchStatusRecord> MarkMatchComplete(Guid matchId)
+        {
+            var existing = await _matchStatusRepository.GetMatchStatusByMatchId(matchId);
+            if (existing == null)
+                throw new Exception($"No status record found for match {matchId}");
+
+            if (existing.Status != MatchStatus.BetsUpdated)
+                throw new InvalidOperationException($"Match status must be 'BetsUpdated' to mark as complete. Current status: {existing.Status}");
+
+            existing.Status = MatchStatus.MatchCompleted;
+            return await _matchStatusRepository.UpdateMatchStatus(existing);
+        }
+
+        public async Task<MatchStatusRecord> OverrideMatchStatus(Guid matchId, MatchStatus status)
+        {
+            var existing = await _matchStatusRepository.GetMatchStatusByMatchId(matchId);
+            if (existing == null)
+                throw new Exception($"No status record found for match {matchId}");
+
+            existing.Status = status;
+            return await _matchStatusRepository.UpdateMatchStatus(existing);
         }
     }
 }

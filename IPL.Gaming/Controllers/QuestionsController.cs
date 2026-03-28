@@ -153,5 +153,38 @@ namespace IPL.Gaming.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }
+
+        [HttpPatch]
+        [Route("SetCorrectAnswer/{questionId}/{matchId}")]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
+        public async Task<IActionResult> SetCorrectAnswer(Guid questionId, Guid matchId, [FromBody] SetCorrectAnswerRequest request)
+        {
+            try
+            {
+                if (request == null)
+                    return BadRequest(new { message = "Request body is required" });
+
+                var matchStatus = await _matchStatusService.GetMatchStatusByMatchId(matchId);
+                if (matchStatus == null || matchStatus.Status != MatchStatus.MatchCompleted)
+                    return StatusCode(403, new { message = "Correct answer can only be set when the match status is Match Completed." });
+
+                var question = await _questionService.GetQuestionById(questionId);
+                if (question == null)
+                    return NotFound(new { message = $"Question with ID {questionId} not found" });
+
+                question.CorrectOptionId = request.CorrectOptionId;
+                var updated = await _questionService.UpdateQuestion(question);
+                return Ok(updated);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+    }
+
+    public class SetCorrectAnswerRequest
+    {
+        public int? CorrectOptionId { get; set; }
     }
 }
