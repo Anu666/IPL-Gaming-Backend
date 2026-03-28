@@ -8,5 +8,6 @@ namespace IPL.Gaming.Common.Models.CosmosDB
         [JsonProperty("id")] public Guid Id { get; set; }
         [JsonProperty("matchId")] public Guid MatchId { get; set; }
         [JsonProperty("status")] public MatchStatus Status { get; set; }
+        [JsonProperty("matchSummary")] public List<MatchSummaryEntry>? MatchSummary { get; set; }
     }
 }

@@ -212,6 +212,18 @@ namespace IPL.Gaming.Services
 
             Console.WriteLine($"[BetSettlementService] Transactions written for {totalEligible} user(s).");
 
+            // ── Build and stamp MatchSummary on the status record ─────────────
+            matchStatus.MatchSummary = eligibleUsers
+                .Select(u => new MatchSummaryEntry
+                {
+                    UserId              = u.Id,
+                    UserName            = u.Name,
+                    OverallCreditChange = Math.Round(userChanges[u.Id].Sum(c => c.CreditChange), 2),
+                    Changes             = userChanges[u.Id]
+                })
+                .OrderBy(e => e.UserName)
+                .ToList();
+
             // ── Transition to BetsSettled ─────────────────────────────────────
             matchStatus.Status = MatchStatus.BetsSettled;
             await _matchStatusService.UpdateMatchStatus(matchStatus);

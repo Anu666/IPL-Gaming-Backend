@@ -158,6 +158,46 @@ namespace IPL.Gaming.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("MarkTransactionsSettled/{matchId}")]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
+        public async Task<IActionResult> MarkTransactionsSettled(Guid matchId)
+        {
+            try
+            {
+                var updated = await _matchStatusService.MarkTransactionsSettled(matchId);
+                return Ok(updated);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        [Route("MarkDone/{matchId}")]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
+        public async Task<IActionResult> MarkDone(Guid matchId)
+        {
+            try
+            {
+                var updated = await _matchStatusService.MarkDone(matchId);
+                return Ok(updated);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         [HttpPut]
         [Route("OverrideMatchStatus/{matchId}")]
         [RequireRole(UserRole.SuperAdmin)]

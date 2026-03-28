@@ -62,6 +62,32 @@ namespace IPL.Gaming.Services
             return await _matchStatusRepository.UpdateMatchStatus(existing);
         }
 
+        public async Task<MatchStatusRecord> MarkTransactionsSettled(Guid matchId)
+        {
+            var existing = await _matchStatusRepository.GetMatchStatusByMatchId(matchId);
+            if (existing == null)
+                throw new Exception($"No status record found for match {matchId}");
+
+            if (existing.Status != MatchStatus.BetsSettled)
+                throw new InvalidOperationException($"Match status must be 'BetsSettled' to mark transactions as settled. Current status: {existing.Status}");
+
+            existing.Status = MatchStatus.TransactionsSettled;
+            return await _matchStatusRepository.UpdateMatchStatus(existing);
+        }
+
+        public async Task<MatchStatusRecord> MarkDone(Guid matchId)
+        {
+            var existing = await _matchStatusRepository.GetMatchStatusByMatchId(matchId);
+            if (existing == null)
+                throw new Exception($"No status record found for match {matchId}");
+
+            if (existing.Status != MatchStatus.TransactionsSettled)
+                throw new InvalidOperationException($"Match status must be 'TransactionsSettled' to mark as done. Current status: {existing.Status}");
+
+            existing.Status = MatchStatus.Done;
+            return await _matchStatusRepository.UpdateMatchStatus(existing);
+        }
+
         public async Task<MatchStatusRecord> OverrideMatchStatus(Guid matchId, MatchStatus status)
         {
             var existing = await _matchStatusRepository.GetMatchStatusByMatchId(matchId);

@@ -7,6 +7,8 @@ namespace IPL.Gaming.Common.Enums
         PicksClosed = 2,
         BetsUpdated = 3,
         MatchCompleted = 4,
-        BetsSettled = 5
+        BetsSettled = 5,
+        TransactionsSettled = 6,
+        Done = 7
     }
 }
