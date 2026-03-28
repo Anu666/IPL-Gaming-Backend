@@ -9,5 +9,9 @@ namespace IPL.Gaming.Common.Models.CosmosDB
 
         [JsonProperty("selectedOption")]
         public int SelectedOption { get; set; }
+
+        /// <summary>Set during bet settlement. Null before settlement.</summary>
+        [JsonProperty("isCorrect")]
+        public bool? IsCorrect { get; set; }
     }
 }

@@ -7,6 +7,7 @@ namespace IPL.Gaming.Services.Interfaces
         Task<List<Transaction>> GetAllTransactions();
         Task<Transaction> GetTransactionById(Guid transactionId);
         Task<List<Transaction>> GetTransactionsByUserId(Guid userId);
+        Task<List<Transaction>> GetTransactionsByMatchId(Guid matchId);
         Task<Transaction> GetTransactionByMatchAndUser(Guid matchId, Guid userId);
         Task<Transaction> CreateTransaction(Transaction transaction);
         Task<Transaction> UpdateTransaction(Transaction transaction);

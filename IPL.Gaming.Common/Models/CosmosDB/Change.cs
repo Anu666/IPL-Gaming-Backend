@@ -1,3 +1,4 @@
+using IPL.Gaming.Common.Enums;
 using Newtonsoft.Json;
 
 namespace IPL.Gaming.Common.Models.CosmosDB
@@ -8,6 +9,9 @@ namespace IPL.Gaming.Common.Models.CosmosDB
         public Guid QuestionId { get; set; }
 
         [JsonProperty("creditChange")]
-        public float CreditChange { get; set; }
+        public double CreditChange { get; set; }
+
+        [JsonProperty("outcome")]
+        public OutcomeType Outcome { get; set; }
     }
 }

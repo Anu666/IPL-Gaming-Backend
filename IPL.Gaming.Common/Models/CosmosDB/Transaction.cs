@@ -1,3 +1,4 @@
+using IPL.Gaming.Common.Enums;
 using Newtonsoft.Json;
 
 namespace IPL.Gaming.Common.Models.CosmosDB
@@ -14,9 +15,12 @@ namespace IPL.Gaming.Common.Models.CosmosDB
         public Guid MatchId { get; set; }
 
         [JsonProperty("overallCreditChange")]
-        public float OverallCreditChange { get; set; }
+        public double OverallCreditChange { get; set; }
 
         [JsonProperty("changes")]
         public List<Change> Changes { get; set; }
+
+        [JsonProperty("status")]
+        public TransactionStatus Status { get; set; } = TransactionStatus.Pending;
     }
 }

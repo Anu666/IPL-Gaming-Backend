@@ -28,6 +28,11 @@ namespace IPL.Gaming.Services
             return await _transactionRepository.GetTransactionsByUserId(userId);
         }
 
+        public async Task<List<Transaction>> GetTransactionsByMatchId(Guid matchId)
+        {
+            return await _transactionRepository.GetTransactionsByMatchId(matchId);
+        }
+
         public async Task<Transaction> GetTransactionByMatchAndUser(Guid matchId, Guid userId)
         {
             return await _transactionRepository.GetTransactionByMatchAndUser(matchId, userId);

@@ -39,6 +39,14 @@ namespace IPL.Gaming.Repository
             return transactions.ToList();
         }
 
+        public async Task<List<Transaction>> GetTransactionsByMatchId(Guid matchId)
+        {
+            var queryDefinition = new QueryDefinition("SELECT * FROM T WHERE T.matchId = @matchId")
+                .WithParameter("@matchId", matchId.ToString());
+            var transactions = await _cosmosService.GetItemsAsync<Transaction>(containerName, queryDefinition);
+            return transactions.ToList();
+        }
+
         public async Task<Transaction> GetTransactionByMatchAndUser(Guid matchId, Guid userId)
         {
             var queryDefinition = new QueryDefinition("SELECT * FROM T WHERE T.matchId = @matchId AND T.userId = @userId")
