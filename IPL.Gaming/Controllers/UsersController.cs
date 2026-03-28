@@ -17,11 +17,13 @@ namespace IPL.Gaming.Controllers
     {
         private readonly IUserService _userService;
         private readonly UserCacheService _userCacheService;
+        private readonly ITransactionService _transactionService;
 
-        public UsersController(IUserService userService, UserCacheService userCacheService)
+        public UsersController(IUserService userService, UserCacheService userCacheService, ITransactionService transactionService)
         {
             _userService = userService;
             _userCacheService = userCacheService;
+            _transactionService = transactionService;
         }
 
         [HttpGet]
@@ -214,9 +216,53 @@ namespace IPL.Gaming.Controllers
                     return NotFound(new { message = $"User with ID {userId} not found" });
                 }
 
-                existingUser.Credits = request.Operation == Common.Models.Requests.CreditsOperation.Increase
-                    ? existingUser.Credits + request.Credits
-                    : request.Credits;
+                if (request.Operation == CreditsOperation.Deposit)
+                {
+                    var creditChange = (double)request.Credits;
+                    existingUser.Credits += request.Credits;
+                    await _transactionService.CreateTransaction(new Transaction
+                    {
+                        UserId               = userId,
+                        OverallCreditChange  = creditChange,
+                        Status               = TransactionStatus.Completed,
+                        Type                 = TransactionType.Deposit
+                    });
+                }
+                else if (request.Operation == CreditsOperation.Withdrawal)
+                {
+                    var creditChange = -(double)request.Credits;
+                    existingUser.Credits -= request.Credits;
+                    await _transactionService.CreateTransaction(new Transaction
+                    {
+                        UserId               = userId,
+                        OverallCreditChange  = creditChange,
+                        Status               = TransactionStatus.Completed,
+                        Type                 = TransactionType.Withdrawal
+                    });
+                }
+                else // Override
+                {
+                    var zeroOut = -(double)existingUser.Credits;
+                    var newValue = (double)request.Credits;
+
+                    await _transactionService.CreateTransaction(new Transaction
+                    {
+                        UserId               = userId,
+                        OverallCreditChange  = zeroOut,
+                        Status               = TransactionStatus.Completed,
+                        Type                 = TransactionType.AdminOverride
+                    });
+                    await _transactionService.CreateTransaction(new Transaction
+                    {
+                        UserId               = userId,
+                        OverallCreditChange  = newValue,
+                        Status               = TransactionStatus.Completed,
+                        Type                 = TransactionType.AdminOverride
+                    });
+
+                    existingUser.Credits = request.Credits;
+                }
+
                 var updatedUser = await _userService.UpdateUser(existingUser);
                 return Ok(updatedUser);
             }

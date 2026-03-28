@@ -34,10 +34,12 @@ namespace IPL.Gaming.Controllers
             Guid Id,
             Guid UserId,
             string UserName,
-            Guid MatchId,
+            Guid? MatchId,
             double OverallCreditChange,
-            List<Change> Changes,
-            TransactionStatus Status);
+            List<Change>? Changes,
+            TransactionStatus Status,
+            TransactionType Type,
+            DateTime CreatedAt);
 
         /// <summary>
         /// Settles all bets for a match. Requires status = MatchCompleted and all
@@ -85,7 +87,9 @@ namespace IPL.Gaming.Controllers
                         t.MatchId,
                         t.OverallCreditChange,
                         t.Changes,
-                        t.Status))
+                        t.Status,
+                        t.Type,
+                        t.CreatedAt))
                     .OrderBy(t => t.UserName)
                     .ToList();
 

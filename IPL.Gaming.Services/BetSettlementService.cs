@@ -195,6 +195,7 @@ namespace IPL.Gaming.Services
                     existing.Changes             = changes;
                     existing.OverallCreditChange = overall;
                     existing.Status              = TransactionStatus.Pending;
+                    existing.Type                = TransactionType.MatchSettlement;
                     await _transactionService.UpdateTransaction(existing);
                 }
                 else
@@ -205,7 +206,8 @@ namespace IPL.Gaming.Services
                         UserId               = user.Id,
                         Changes              = changes,
                         OverallCreditChange  = overall,
-                        Status               = TransactionStatus.Pending
+                        Status               = TransactionStatus.Pending,
+                        Type                 = TransactionType.MatchSettlement
                     });
                 }
             }

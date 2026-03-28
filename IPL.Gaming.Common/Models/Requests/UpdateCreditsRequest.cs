@@ -2,13 +2,14 @@ namespace IPL.Gaming.Common.Models.Requests
 {
     public enum CreditsOperation
     {
-        Override = 0,
-        Increase = 1
+        Deposit = 0,
+        Withdrawal = 1,
+        Override = 2
     }
 
     public class UpdateCreditsRequest
     {
         public float Credits { get; set; }
-        public CreditsOperation Operation { get; set; } = CreditsOperation.Override;
+        public CreditsOperation Operation { get; set; } = CreditsOperation.Deposit;
     }
 }
