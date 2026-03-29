@@ -2,6 +2,7 @@ using IPL.Gaming.Attributes;
 using IPL.Gaming.Common.Enums;
 using IPL.Gaming.Common.Mappers;
 using IPL.Gaming.Common.Models.Requests;
+using IPL.Gaming.Common.Models.Responses;
 using IPL.Gaming.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,7 +28,13 @@ namespace IPL.Gaming.Controllers
             try
             {
                 var statuses = await _matchStatusService.GetAllMatchStatuses();
-                return Ok(statuses);
+                var summary = statuses.Select(s => new MatchStatusSummary
+                {
+                    Id = s.Id,
+                    MatchId = s.MatchId,
+                    Status = s.Status,
+                });
+                return Ok(summary);
             }
             catch (Exception ex)
             {
