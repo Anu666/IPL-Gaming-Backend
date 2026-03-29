@@ -3,6 +3,7 @@ using IPL.Gaming.Common.Enums;
 using IPL.Gaming.Common.Mappers;
 using IPL.Gaming.Common.Models.CosmosDB;
 using IPL.Gaming.Common.Models.Requests;
+using IPL.Gaming.Common.Models.Responses;
 using IPL.Gaming.Services;
 using IPL.Gaming.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -32,6 +33,29 @@ namespace IPL.Gaming.Controllers
         {
             var users = await _userService.GetAllUsers();
             return Ok(users);
+        }
+
+        /// <summary>
+        /// Returns all users without API keys. Accessible to Admin and SuperAdmin.
+        /// </summary>
+        [HttpGet("GetAllUsersForAdmin")]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
+        public async Task<IActionResult> GetAllUsersForAdmin()
+        {
+            var users = await _userService.GetAllUsers();
+            var summaries = users.Select(u => new UserSummary
+            {
+                Id = u.Id,
+                Name = u.Name,
+                Email = u.Email,
+                PhoneNumber = u.PhoneNumber,
+                IsActive = u.IsActive,
+                Role = u.Role,
+                Credits = u.Credits,
+                CreatedDate = u.CreatedDate,
+                LastLoginDate = u.LastLoginDate,
+            });
+            return Ok(summaries);
         }
 
         [HttpGet]
