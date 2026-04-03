@@ -43,11 +43,11 @@ namespace IPL.Gaming.Controllers
 
         /// <summary>
         /// Settles all bets for a match. Requires status = MatchCompleted and all
-        /// questions to have correctOptionId set. SuperAdmin only.
+        /// questions to have correctOptionId set. Admin+.
         /// </summary>
         [HttpPost]
         [Route("SettleBets/{matchId}")]
-        [RequireRole(UserRole.SuperAdmin)]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
         public async Task<IActionResult> SettleBets(Guid matchId)
         {
             try
@@ -103,11 +103,11 @@ namespace IPL.Gaming.Controllers
 
         /// <summary>
         /// Completes a single pending transaction: applies credit change to the user
-        /// and marks the transaction as Completed. SuperAdmin only.
+        /// and marks the transaction as Completed. Admin+.
         /// </summary>
         [HttpPost]
         [Route("CompleteTransaction/{transactionId}")]
-        [RequireRole(UserRole.SuperAdmin)]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
         public async Task<IActionResult> CompleteTransaction(Guid transactionId)
         {
             try
@@ -141,11 +141,11 @@ namespace IPL.Gaming.Controllers
 
         /// <summary>
         /// Completes all pending transactions for a match: applies credit changes to
-        /// each user and marks all transactions as Completed. SuperAdmin only.
+        /// each user and marks all transactions as Completed. Admin+.
         /// </summary>
         [HttpPost]
         [Route("CompleteAllTransactions/{matchId}")]
-        [RequireRole(UserRole.SuperAdmin)]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
         public async Task<IActionResult> CompleteAllTransactions(Guid matchId)
         {
             try
