@@ -10,6 +10,7 @@ namespace IPL.Gaming.Common.Models.CosmosDB
         [JsonProperty("status")] public MatchStatus Status { get; set; }
         [JsonProperty("matchSummary")] public List<MatchSummaryEntry>? MatchSummary { get; set; }
         [JsonProperty("completedAt")] public DateTime? CompletedAt { get; set; }
+       [JsonProperty("archivedAt")] public DateTime? ArchivedAt { get; set; }
         [JsonProperty("leaderboard")] public List<LeaderboardEntry>? Leaderboard { get; set; }
     }
 }

@@ -52,6 +52,7 @@ builder.Services.AddHostedService(provider => provider.GetRequiredService<UserCa
 
 // Register background jobs
 builder.Services.AddHostedService<PicksLockJob>();
+builder.Services.AddHostedService<ArchiveMatchesJob>();
 
 var app = builder.Build();
 

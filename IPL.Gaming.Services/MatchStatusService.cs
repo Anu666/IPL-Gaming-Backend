@@ -95,6 +95,21 @@ namespace IPL.Gaming.Services
             return await _matchStatusRepository.UpdateMatchStatus(existing);
         }
 
+        public async Task<MatchStatusRecord> MarkArchived(Guid matchId)
+        {
+            var existing = await _matchStatusRepository.GetMatchStatusByMatchId(matchId);
+            if (existing == null)
+                throw new Exception($"No status record found for match {matchId}");
+
+            if (existing.Status != MatchStatus.Done)
+                throw new InvalidOperationException($"Match status must be 'Done' to mark as archived. Current status: {existing.Status}");
+
+            existing.Status     = MatchStatus.Archived;
+            existing.ArchivedAt = DateTime.UtcNow;
+
+            return await _matchStatusRepository.UpdateMatchStatus(existing);
+        }
+
         public async Task<MatchStatusRecord> OverrideMatchStatus(Guid matchId, MatchStatus status)
         {
             var existing = await _matchStatusRepository.GetMatchStatusByMatchId(matchId);
