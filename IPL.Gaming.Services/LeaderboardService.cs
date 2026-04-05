@@ -24,11 +24,12 @@ namespace IPL.Gaming.Services
             if (currentMatch == null || currentMatch.CompletedAt == null)
                 throw new InvalidOperationException($"Current match {currentMatchId} not found or has no completion time");
 
-            // Include only Done/Archived matches that were completed BEFORE the current match
+            // Include all Done/Archived matches that were completed AT OR BEFORE the current match
+            // Using <= to include the current match in its own leaderboard
             var relevantRecords = allRecords
                 .Where(r => r.MatchSummary != null && r.MatchSummary.Count > 0 &&
                             r.CompletedAt.HasValue &&
-                            r.CompletedAt.Value < currentMatch.CompletedAt.Value &&
+                            r.CompletedAt.Value <= currentMatch.CompletedAt.Value &&
                             (r.Status == MatchStatus.Done || r.Status == MatchStatus.Archived))
                 .ToList();
 

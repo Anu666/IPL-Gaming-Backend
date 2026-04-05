@@ -63,6 +63,7 @@ namespace IPL.Gaming.Services
                 throw new InvalidOperationException($"Match status must be 'BetsUpdated' to mark as complete. Current status: {existing.Status}");
 
             existing.Status = MatchStatus.MatchCompleted;
+            existing.CompletedAt = DateTime.UtcNow; // Set completion timestamp when match completes
             return await _matchStatusRepository.UpdateMatchStatus(existing);
         }
 
@@ -88,8 +89,12 @@ namespace IPL.Gaming.Services
             if (existing.Status != MatchStatus.TransactionsSettled)
                 throw new InvalidOperationException($"Match status must be 'TransactionsSettled' to mark as done. Current status: {existing.Status}");
 
+            // CompletedAt should already be set from MarkMatchComplete
+            // If not set (edge case), set it now
+            if (!existing.CompletedAt.HasValue)
+                existing.CompletedAt = DateTime.UtcNow;
+
             existing.Status      = MatchStatus.Done;
-            existing.CompletedAt = DateTime.UtcNow;
             existing.Leaderboard = await _leaderboardService.CalculateCumulativeLeaderboard(matchId);
 
             return await _matchStatusRepository.UpdateMatchStatus(existing);
