@@ -45,6 +45,16 @@ namespace IPL.Gaming.Services
                 throw new InvalidOperationException(
                     $"Correct answers not set for {unansweredQuestions.Count} question(s). Set all correct answers before settling.");
 
+            // ── Validate that each correct option ID exists in question's options ───
+            foreach (var question in questions)
+            {
+                var correctOptionId = question.CorrectOptionId!.Value;
+                var optionExists = question.Options?.Any(o => o.Id == correctOptionId) ?? false;
+                if (!optionExists)
+                    throw new InvalidOperationException(
+                        $"Question '{question.QuestionText}' has correctOptionId={correctOptionId}, but this option ID does not exist in its options list.");
+            }
+
             // ── Build eligible player pool: all active users ──────────────────
             var allUsers = await _userService.GetAllUsers();
             var eligibleUsers = allUsers.Where(u => u.IsActive).ToList();

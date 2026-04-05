@@ -1,6 +1,7 @@
 using IPL.Gaming.Attributes;
 using IPL.Gaming.Common.Enums;
 using IPL.Gaming.Common.Mappers;
+using IPL.Gaming.Common.Models.CosmosDB;
 using IPL.Gaming.Common.Models.Requests;
 using IPL.Gaming.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -19,6 +20,45 @@ namespace IPL.Gaming.Controllers
         {
             _questionService = questionService;
             _matchStatusService = matchStatusService;
+        }
+
+        private (bool isValid, string errorMessage) ValidateQuestionOptions(List<Option> options, float credits)
+        {
+            // Check if options list exists
+            if (options == null || options.Count == 0)
+                return (false, "At least 2 options are required");
+
+            // Check minimum options
+            if (options.Count < 2)
+                return (false, "At least 2 options are required for a valid question");
+
+            // Check maximum options
+            if (options.Count > 10)
+                return (false, "Maximum 10 options allowed per question");
+
+            // Check for duplicate option IDs
+            var optionIds = options.Select(o => o.Id).ToList();
+            if (optionIds.Count != optionIds.Distinct().Count())
+                return (false, "Duplicate option IDs found. Each option must have a unique ID");
+
+            // Check all option IDs are positive
+            if (options.Any(o => o.Id <= 0))
+                return (false, "All option IDs must be positive integers");
+
+            // Check all option texts are non-empty
+            if (options.Any(o => string.IsNullOrWhiteSpace(o.OptionText)))
+                return (false, "All options must have non-empty text");
+
+            // Check for duplicate option texts (case-insensitive)
+            var optionTexts = options.Select(o => o.OptionText.Trim().ToLower()).ToList();
+            if (optionTexts.Count != optionTexts.Distinct().Count())
+                return (false, "Duplicate option texts found. Each option must have unique text");
+
+            // Check credits
+            if (credits <= 0)
+                return (false, "Credits must be greater than 0");
+
+            return (true, string.Empty);
         }
 
         [HttpGet]
@@ -89,6 +129,11 @@ namespace IPL.Gaming.Controllers
                 if (request.MatchId == Guid.Empty)
                     return BadRequest(new { message = "A valid Match ID is required" });
 
+                // Validate options and credits
+                var (isValid, errorMessage) = ValidateQuestionOptions(request.Options, request.Credits);
+                if (!isValid)
+                    return BadRequest(new { message = errorMessage });
+
                 var matchStatus = await _matchStatusService.GetMatchStatusByMatchId(request.MatchId);
                 if (matchStatus != null && matchStatus.Status != MatchStatus.NotStarted)
                     return StatusCode(403, new { message = "Questions are locked. Match status must be Not Started to add questions." });
@@ -115,6 +160,11 @@ namespace IPL.Gaming.Controllers
 
                 if (request.MatchId == Guid.Empty)
                     return BadRequest(new { message = "A valid Match ID is required" });
+
+                // Validate options and credits
+                var (isValid, errorMessage) = ValidateQuestionOptions(request.Options, request.Credits);
+                if (!isValid)
+                    return BadRequest(new { message = errorMessage });
 
                 var matchStatus = await _matchStatusService.GetMatchStatusByMatchId(request.MatchId);
                 if (matchStatus != null && matchStatus.Status != MatchStatus.NotStarted)
@@ -171,6 +221,14 @@ namespace IPL.Gaming.Controllers
                 var question = await _questionService.GetQuestionById(questionId);
                 if (question == null)
                     return NotFound(new { message = $"Question with ID {questionId} not found" });
+
+                // Validate that the correct option ID exists in the question's options
+                if (request.CorrectOptionId.HasValue)
+                {
+                    var optionExists = question.Options?.Any(o => o.Id == request.CorrectOptionId.Value) ?? false;
+                    if (!optionExists)
+                        return BadRequest(new { message = $"Option ID {request.CorrectOptionId} does not exist in this question's options" });
+                }
 
                 question.CorrectOptionId = request.CorrectOptionId;
                 var updated = await _questionService.UpdateQuestion(question);

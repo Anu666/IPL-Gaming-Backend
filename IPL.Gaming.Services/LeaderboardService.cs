@@ -19,11 +19,17 @@ namespace IPL.Gaming.Services
             // All match status records
             var allRecords = await _matchStatusRepository.GetAllMatchStatuses();
 
-            // Include all Done records (previous completed matches) + the current match record
-            // (which is still TransactionsSettled at this point but has MatchSummary from SettleBets)
+            // Get the current match's completion time
+            var currentMatch = allRecords.FirstOrDefault(r => r.MatchId == currentMatchId);
+            if (currentMatch == null || currentMatch.CompletedAt == null)
+                throw new InvalidOperationException($"Current match {currentMatchId} not found or has no completion time");
+
+            // Include only Done/Archived matches that were completed BEFORE the current match
             var relevantRecords = allRecords
                 .Where(r => r.MatchSummary != null && r.MatchSummary.Count > 0 &&
-                            (r.Status == MatchStatus.Done || r.MatchId == currentMatchId))
+                            r.CompletedAt.HasValue &&
+                            r.CompletedAt.Value < currentMatch.CompletedAt.Value &&
+                            (r.Status == MatchStatus.Done || r.Status == MatchStatus.Archived))
                 .ToList();
 
             // Aggregate per user across all relevant records

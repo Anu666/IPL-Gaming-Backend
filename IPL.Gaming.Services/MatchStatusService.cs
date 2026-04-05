@@ -110,6 +110,20 @@ namespace IPL.Gaming.Services
             return await _matchStatusRepository.UpdateMatchStatus(existing);
         }
 
+        public async Task<MatchStatusRecord> RecalculateLeaderboard(Guid matchId)
+        {
+            var existing = await _matchStatusRepository.GetMatchStatusByMatchId(matchId);
+            if (existing == null)
+                throw new Exception($"No status record found for match {matchId}");
+
+            if (existing.Status != MatchStatus.Done && existing.Status != MatchStatus.Archived)
+                throw new InvalidOperationException($"Match status must be 'Done' or 'Archived' to recalculate leaderboard. Current status: {existing.Status}");
+
+            existing.Leaderboard = await _leaderboardService.CalculateCumulativeLeaderboard(matchId);
+
+            return await _matchStatusRepository.UpdateMatchStatus(existing);
+        }
+
         public async Task<MatchStatusRecord> OverrideMatchStatus(Guid matchId, MatchStatus status)
         {
             var existing = await _matchStatusRepository.GetMatchStatusByMatchId(matchId);

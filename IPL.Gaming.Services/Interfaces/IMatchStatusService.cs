@@ -14,6 +14,7 @@ namespace IPL.Gaming.Services.Interfaces
         Task<MatchStatusRecord> MarkTransactionsSettled(Guid matchId);
         Task<MatchStatusRecord> MarkDone(Guid matchId);
         Task<MatchStatusRecord> MarkArchived(Guid matchId);
+        Task<MatchStatusRecord> RecalculateLeaderboard(Guid matchId);
         Task<MatchStatusRecord> OverrideMatchStatus(Guid matchId, MatchStatus status);
         Task<bool> DeleteMatchStatus(Guid matchStatusId, Guid matchId);
     }
