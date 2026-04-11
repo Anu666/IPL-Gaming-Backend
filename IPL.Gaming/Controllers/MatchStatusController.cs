@@ -14,10 +14,12 @@ namespace IPL.Gaming.Controllers
     public class MatchStatusController : BaseController
     {
         private readonly IMatchStatusService _matchStatusService;
+        private readonly IMatchService _matchService;
 
-        public MatchStatusController(IMatchStatusService matchStatusService)
+        public MatchStatusController(IMatchStatusService matchStatusService, IMatchService matchService)
         {
             _matchStatusService = matchStatusService;
+            _matchService = matchService;
         }
 
         [HttpGet]
@@ -33,6 +35,7 @@ namespace IPL.Gaming.Controllers
                     Id = s.Id,
                     MatchId = s.MatchId,
                     Status = s.Status,
+                    MatchCommenceStartDate = s.MatchCommenceStartDate,
                 });
                 return Ok(summary);
             }
@@ -263,10 +266,50 @@ namespace IPL.Gaming.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }
+
+        [HttpPatch]
+        [Route("UpdateMatchStartTime/{matchId}")]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
+        public async Task<IActionResult> UpdateMatchStartTime(Guid matchId, [FromBody] UpdateMatchStartTimeRequest request)
+        {
+            try
+            {
+                if (request == null)
+                    return BadRequest(new { message = "Request body is required" });
+
+                // Fetch both records
+                var matchStatus = await _matchStatusService.GetMatchStatusByMatchId(matchId);
+                if (matchStatus == null)
+                    return NotFound(new { message = $"No status record found for match {matchId}" });
+
+                var match = await _matchService.GetMatchById(matchId);
+                if (match == null)
+                    return NotFound(new { message = $"Match with ID {matchId} not found" });
+
+                // Update MatchStatus record
+                matchStatus.MatchCommenceStartDate = request.MatchCommenceStartDate;
+                var updatedStatus = await _matchStatusService.UpdateMatchStatus(matchStatus);
+
+                // Keep Match record in sync so the backend lock check is consistent
+                match.MatchCommenceStartDate = request.MatchCommenceStartDate;
+                await _matchService.UpdateMatch(match);
+
+                return Ok(updatedStatus);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
     }
 
     public class OverrideStatusRequest
     {
         public MatchStatus Status { get; set; }
+    }
+
+    public class UpdateMatchStartTimeRequest
+    {
+        public DateTime MatchCommenceStartDate { get; set; }
     }
 }

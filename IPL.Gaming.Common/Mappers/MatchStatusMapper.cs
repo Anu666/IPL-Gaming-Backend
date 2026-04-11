@@ -8,7 +8,8 @@ namespace IPL.Gaming.Common.Mappers
         public static MatchStatusRecord ToMatchStatusRecord(CreateMatchStatusRequest request) => new MatchStatusRecord
         {
             MatchId = request.MatchId,
-            Status = request.Status
+            Status = request.Status,
+            MatchCommenceStartDate = request.MatchCommenceStartDate
         };
 
         public static MatchStatusRecord ToMatchStatusRecord(UpdateMatchStatusRequest request) => new MatchStatusRecord

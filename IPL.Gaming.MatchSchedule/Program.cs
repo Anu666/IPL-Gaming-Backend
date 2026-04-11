@@ -31,6 +31,7 @@ services.AddScoped<ICosmosService, CosmosService>();
 services.AddScoped<IMatchRepository, MatchRepository>();
 services.AddScoped<IMatchService, MatchService>();
 services.AddScoped<IMatchStatusRepository, MatchStatusRepository>();
+services.AddScoped<ILeaderboardService, LeaderboardService>();
 services.AddScoped<IMatchStatusService, MatchStatusService>();
 
 var serviceProvider = services.BuildServiceProvider();

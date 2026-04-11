@@ -7,5 +7,6 @@ namespace IPL.Gaming.Common.Models.Responses
         public Guid Id { get; set; }
         public Guid MatchId { get; set; }
         public MatchStatus Status { get; set; }
+        public DateTime? MatchCommenceStartDate { get; set; }
     }
 }

@@ -1,5 +1,3 @@
-using IPL.Gaming.Common.Enums;
-using IPL.Gaming.Common.Models.CosmosDB;
 using IPL.Gaming.Services.Interfaces;
 
 namespace IPL.Gaming.MatchSchedule
@@ -17,7 +15,7 @@ namespace IPL.Gaming.MatchSchedule
 
         public async Task Run()
         {
-            Console.WriteLine("\nIPL Gaming - Match Status Import");
+            Console.WriteLine("\nIPL Gaming - Match Status: Backfill MatchCommenceStartDate");
             Console.WriteLine("===================================\n");
 
             var matches = await _matchService.GetAllMatches();
@@ -28,34 +26,39 @@ namespace IPL.Gaming.MatchSchedule
                 return;
             }
 
-            Console.WriteLine($"Found {matches.Count} matches. Creating MatchStatus records...\n");
+            Console.WriteLine($"Found {matches.Count} matches. Updating MatchStatus records with MatchCommenceStartDate...\n");
 
-            int successCount = 0;
-            int skippedCount = 0;
+            int updatedCount = 0;
             int failureCount = 0;
 
             foreach (var match in matches)
             {
                 try
                 {
-                    // Skip if a status record already exists for this match
                     var existing = await _matchStatusService.GetMatchStatusByMatchId(match.Id);
-                    if (existing != null)
+                    if (existing == null)
                     {
-                        Console.WriteLine($"~ Skipped (already exists): {match.MatchName}");
-                        skippedCount++;
+                        Console.WriteLine($"~ No status record found for: {match.MatchName} — skipping");
                         continue;
                     }
 
-                    var matchStatus = new MatchStatusRecord
-                    {
-                        MatchId = match.Id,
-                        Status = MatchStatus.NotStarted
-                    };
+                    existing.MatchCommenceStartDate = match.MatchCommenceStartDate;
+                    await _matchStatusService.UpdateMatchStatus(existing);
+                    Console.WriteLine($"✓ Updated: {match.MatchName} → {match.MatchCommenceStartDate:yyyy-MM-dd HH:mm}");
+                    updatedCount++;
 
-                    var created = await _matchStatusService.CreateMatchStatus(matchStatus);
-                    Console.WriteLine($"✓ Created: {match.MatchName} → {created.Status} (ID: {created.Id})");
-                    successCount++;
+                    // -------------------------------------------------------
+                    // Old "create new record" logic — commented out because all
+                    // MatchStatus records already exist in the database.
+                    // -------------------------------------------------------
+                    //var matchStatus = new MatchStatusRecord
+                    //{
+                    //    MatchId = match.Id,
+                    //    Status = MatchStatus.NotStarted
+                    //};
+                    //var created = await _matchStatusService.CreateMatchStatus(matchStatus);
+                    //Console.WriteLine($"✓ Created: {match.MatchName} → {created.Status} (ID: {created.Id})");
+                    // -------------------------------------------------------
                 }
                 catch (Exception ex)
                 {
@@ -66,10 +69,9 @@ namespace IPL.Gaming.MatchSchedule
             }
 
             Console.WriteLine($"\n===================================");
-            Console.WriteLine($"Match Status Import completed!");
-            Console.WriteLine($"Created:  {successCount}");
-            Console.WriteLine($"Skipped:  {skippedCount}");
-            Console.WriteLine($"Failed:   {failureCount}");
+            Console.WriteLine($"Backfill completed!");
+            Console.WriteLine($"Updated: {updatedCount}");
+            Console.WriteLine($"Failed:  {failureCount}");
             Console.WriteLine($"===================================");
         }
     }

@@ -6,5 +6,6 @@ namespace IPL.Gaming.Common.Models.Requests
     {
         public Guid MatchId { get; set; }
         public MatchStatus Status { get; set; } = MatchStatus.NotStarted;
+        public DateTime? MatchCommenceStartDate { get; set; }
     }
 }
