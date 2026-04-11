@@ -17,7 +17,7 @@ namespace IPL.Gaming.Services
         // Target fire times in IST (hours, minutes)
         private static readonly (int Hour, int Minute)[] FireTimes =
         [
-            (13, 17), // 3:30 PM IST
+            (15, 30), // 3:30 PM IST
             (19, 30), // 7:30 PM IST
         ];
 
