@@ -87,6 +87,12 @@ namespace IPL.Gaming.Services
             {
                 try
                 {
+                    if (statusRecord.IsDelayed)
+                    {
+                        Console.WriteLine($"[PicksLockJob] Match {statusRecord.MatchId} is marked as delayed — skipping lock.");
+                        continue;
+                    }
+
                     var match = await matchService.GetMatchById(statusRecord.MatchId);
                     if (match == null)
                     {

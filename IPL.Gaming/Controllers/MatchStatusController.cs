@@ -36,6 +36,7 @@ namespace IPL.Gaming.Controllers
                     MatchId = s.MatchId,
                     Status = s.Status,
                     MatchCommenceStartDate = s.MatchCommenceStartDate,
+                    IsDelayed = s.IsDelayed,
                 });
                 return Ok(summary);
             }
@@ -295,6 +296,48 @@ namespace IPL.Gaming.Controllers
                 await _matchService.UpdateMatch(match);
 
                 return Ok(updatedStatus);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        [Route("MarkDelayed/{matchId}")]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
+        public async Task<IActionResult> MarkDelayed(Guid matchId)
+        {
+            try
+            {
+                var matchStatus = await _matchStatusService.GetMatchStatusByMatchId(matchId);
+                if (matchStatus == null)
+                    return NotFound(new { message = $"No status record found for match {matchId}" });
+
+                matchStatus.IsDelayed = true;
+                var updated = await _matchStatusService.UpdateMatchStatus(matchStatus);
+                return Ok(updated);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        [Route("UnmarkDelayed/{matchId}")]
+        [RequireRole(UserRole.Admin, UserRole.SuperAdmin)]
+        public async Task<IActionResult> UnmarkDelayed(Guid matchId)
+        {
+            try
+            {
+                var matchStatus = await _matchStatusService.GetMatchStatusByMatchId(matchId);
+                if (matchStatus == null)
+                    return NotFound(new { message = $"No status record found for match {matchId}" });
+
+                matchStatus.IsDelayed = false;
+                var updated = await _matchStatusService.UpdateMatchStatus(matchStatus);
+                return Ok(updated);
             }
             catch (Exception ex)
             {

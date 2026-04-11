@@ -14,11 +14,13 @@ namespace IPL.Gaming.Controllers
     {
         private readonly IUserAnswerService _userAnswerService;
         private readonly IMatchService _matchService;
+        private readonly IMatchStatusService _matchStatusService;
 
-        public UserAnswersController(IUserAnswerService userAnswerService, IMatchService matchService)
+        public UserAnswersController(IUserAnswerService userAnswerService, IMatchService matchService, IMatchStatusService matchStatusService)
         {
             _userAnswerService = userAnswerService;
             _matchService = matchService;
+            _matchStatusService = matchStatusService;
         }
 
         [HttpGet]
@@ -121,9 +123,14 @@ namespace IPL.Gaming.Controllers
 
                 // MatchCommenceStartDate is stored as IST wall-clock time (no timezone indicator).
                 // Convert UtcNow to IST (UTC+5:30) and compare directly to avoid server-timezone issues.
-                var nowIst = DateTime.UtcNow.AddHours(5).AddMinutes(30);
-                if (nowIst >= match.MatchCommenceStartDate)
-                    return StatusCode(403, new { message = "Picks are locked. The match has already started." });
+                // Skip the time check entirely when the match is marked as delayed.
+                var matchStatus = await _matchStatusService.GetMatchStatusByMatchId(request.MatchId);
+                if (matchStatus == null || !matchStatus.IsDelayed)
+                {
+                    var nowIst = DateTime.UtcNow.AddHours(5).AddMinutes(30);
+                    if (nowIst >= match.MatchCommenceStartDate)
+                        return StatusCode(403, new { message = "Picks are locked. The match has already started." });
+                }
 
                 var userAnswer = UserAnswerMapper.ToUserAnswer(request);
                 var created = await _userAnswerService.CreateUserAnswer(userAnswer);
@@ -157,9 +164,14 @@ namespace IPL.Gaming.Controllers
 
                 // MatchCommenceStartDate is stored as IST wall-clock time (no timezone indicator).
                 // Convert UtcNow to IST (UTC+5:30) and compare directly to avoid server-timezone issues.
-                var nowIst = DateTime.UtcNow.AddHours(5).AddMinutes(30);
-                if (nowIst >= match.MatchCommenceStartDate)
-                    return StatusCode(403, new { message = "Picks are locked. The match has already started." });
+                // Skip the time check entirely when the match is marked as delayed.
+                var matchStatus = await _matchStatusService.GetMatchStatusByMatchId(request.MatchId);
+                if (matchStatus == null || !matchStatus.IsDelayed)
+                {
+                    var nowIst = DateTime.UtcNow.AddHours(5).AddMinutes(30);
+                    if (nowIst >= match.MatchCommenceStartDate)
+                        return StatusCode(403, new { message = "Picks are locked. The match has already started." });
+                }
 
                 var userAnswer = UserAnswerMapper.ToUserAnswer(request);
                 var updated = await _userAnswerService.UpdateUserAnswer(userAnswer);
